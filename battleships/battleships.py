@@ -1,9 +1,13 @@
+import configparser
 from enum import Enum
 import os
 from typing import List, Dict, Tuple, Optional, Union, Set, NamedTuple, Any
 
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+ini_config = configparser.ConfigParser()
+ini_config.read(os.path.join(BASE_DIR, 'Battleships.ini'))
 
 
 class FieldType(Enum):
@@ -207,10 +211,7 @@ def get_redefined_FieldType():
     """Returns the custom FieldType enum definition based on the
     Battleships.ini file configuration.
     """
-    import configparser
     fieldtype_mappings = {}  # type: Dict[str, str]
-    ini_config = configparser.ConfigParser()
-    ini_config.read(os.path.join(BASE_DIR, 'Battleships.ini'))
     for field_name in [field_type.name for field_type in FieldType]:
         fieldtype_mappings[field_name] = \
             ini_config['FIELDTYPESYMBOLS'][field_name]
@@ -746,7 +747,9 @@ def main(input_file_uri: str) -> None:
         print(solution.repr(True))
     if solutions:
         print("{} solutions in total.".format(len(solutions)))
+    else:
+        print('No solutions found.')
 
 
 if __name__ == "__main__":
-    main(os.path.join(BASE_DIR, 'tests/board_samples/board09.txt'))
+    main(ini_config['INPUTFILE']['PATH'])
