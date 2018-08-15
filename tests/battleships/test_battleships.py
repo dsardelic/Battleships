@@ -1,3 +1,4 @@
+import os
 import random
 import re
 import unittest
@@ -5,16 +6,19 @@ import unittest
 from battleships import battleships as bs
 
 
-class BattleshipTest(unittest.TestCase):
+TESTS_DIR = os.path.join(bs.BASE_DIR, 'tests')
+
+
+class BattleshipsTest(unittest.TestCase):
 
     def setUp(self):
         global g_exp_board
         global g_exp_fleet
         random.seed()
-        bs.FieldType = bs.get_redefined_FieldType_from_ini_file(
-            '../Battleships.ini'
+        bs.FieldType = bs.get_redefined_FieldType()
+        sample_input_data = bs.get_data_from_file(
+            os.path.join(TESTS_DIR, 'board_samples/board02.txt')
         )
-        sample_input_data = bs.get_data_from_file('board_samples/board02.txt')
         g_exp_board = bs.get_board_from_input_data(*sample_input_data[0:4])
         g_exp_fleet = sample_input_data[4]
         unittest.TestCase.setUp(self)
@@ -191,10 +195,8 @@ class BattleshipTest(unittest.TestCase):
         self.assertEqual(g_exp_fleet, fleet)
         self.assertEqual(g_exp_fleet is fleet, False)
 
-    def test_get_redefined_FieldType_from_ini_file(self):
-        FieldType = bs.get_redefined_FieldType_from_ini_file(
-            '../Battleships.ini'
-        )
+    def test_get_redefined_FieldType(self):
+        FieldType = bs.get_redefined_FieldType()
         self.assertEqual(FieldType.SEA.value, '.')
         self.assertEqual(FieldType.SHIP.value, 'O')
         self.assertEqual(FieldType.UNKNOWN.value, 'x')
@@ -209,7 +211,9 @@ class BattleshipTest(unittest.TestCase):
         exp_playfield[9][4] = bs.FieldType.SHIP
         act_board_size, act_playfield, act_solution_pcs_in_rows, \
             act_solution_pcs_in_cols, act_fleet = \
-            bs.get_data_from_file('board_samples/board02.txt')
+            bs.get_data_from_file(
+                os.path.join(TESTS_DIR, 'board_samples/board02.txt')
+            )
         self.assertEqual(act_board_size, 10)
         self.assertEqual(act_playfield, exp_playfield)
         self.assertEqual(
@@ -1092,7 +1096,9 @@ class BattleshipTest(unittest.TestCase):
             '(1) (1) (4) (1) (6) (1) (0) (2) (2) (2) \n'
         )
         self.assertEqual(
-            bs.get_solutions_for_input_file('board_samples/board02.txt'),
+            bs.get_solutions_for_input_file(
+                os.path.join(TESTS_DIR, 'board_samples/board02.txt')
+            ),
             [
                 self.parse_board(solution1),
                 self.parse_board(solution2),

@@ -1,6 +1,9 @@
 from enum import Enum
-import sys
+import os
 from typing import List, Dict, Tuple, Optional, Union, Set, NamedTuple, Any
+
+
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
 class FieldType(Enum):
@@ -200,25 +203,21 @@ class Fleet():
         return self.__class__(self.ship_lengths, self.subfleet_sizes)
 
 
-def get_redefined_FieldType_from_ini_file(ini_file_uri: str):
-    """Returns a custom definition of the FieldType enum.
-
-    Field types and their corresponding symbols are defined within the
-    [FieldTypeSymbols] section of the Battleships.ini configuration file.
+def get_redefined_FieldType():
+    """Returns the custom FieldType enum definition based on the
+    Battleships.ini file configuration.
     """
+    import configparser
     fieldtype_mappings = {}  # type: Dict[str, str]
-    with open(ini_file_uri) as prop_file:
-        import configparser
-        cp = configparser.ConfigParser()
-        cp.read_file(prop_file, ini_file_uri)
-        for field_name in [field_type.name for field_type in FieldType]:
-            fieldtype_mappings[field_name] = cp.get(
-                'FieldTypeSymbols', field_name
-            )
-        redefined_FieldType = Enum('FieldType', fieldtype_mappings)
-        redefined_FieldType.__repr__ = \
-            lambda self: '<FieldType.{}>'.format(self.name)
-        return redefined_FieldType
+    ini_config = configparser.ConfigParser()
+    ini_config.read(os.path.join(BASE_DIR, 'Battleships.ini'))
+    for field_name in [field_type.name for field_type in FieldType]:
+        fieldtype_mappings[field_name] = \
+            ini_config['FIELDTYPESYMBOLS'][field_name]
+    redefined_FieldType = Enum('FieldType', fieldtype_mappings)
+    redefined_FieldType.__repr__ = \
+        lambda self: '<FieldType.{}>'.format(self.name)
+    return redefined_FieldType
 
 
 def get_data_from_file(input_file_uri: str) -> Tuple[
@@ -641,6 +640,7 @@ def find_and_add_solutions(
                 else:
                     solutions.append(new_board)
         else:
+            import sys
             if 'combinations' not in sys.modules:
                 from itertools import combinations
             for ship_combination in combinations(
@@ -715,7 +715,7 @@ def get_solutions_for_input_file(input_file_uri: str) -> List[Board]:
     input_file_uri - URI of file containing board and fleet data.
     """
     global FieldType
-    FieldType = get_redefined_FieldType_from_ini_file('../Battleships.ini')
+    FieldType = get_redefined_FieldType()
     board_size, playfield, solution_pcs_in_rows, solution_pcs_in_cols, \
         fleet = get_data_from_file(input_file_uri)
     board = get_board_from_input_data(
@@ -749,4 +749,4 @@ def main(input_file_uri: str) -> None:
 
 
 if __name__ == "__main__":
-    main('../tests/board_samples/board02.txt')
+    main(os.path.join(BASE_DIR, 'tests/board_samples/board09.txt'))
