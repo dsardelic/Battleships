@@ -190,7 +190,7 @@ class Fleet():
 
     def __repr__(self):
         """Overrides the built-in class method."""
-        def get_sorted_dict(d: Dict[int, int]) -> Dict[int, int]:
+        def get_sorted_dict_repr(d: Dict[int, int]) -> str:
             """Returns a text representation of a dictionary sorted by its keys
             in descending order.
             """
@@ -212,7 +212,7 @@ class Fleet():
         return (
             "Fleet(ship_lengths={}, subfleet_sizes=".format(
                 self.ship_lengths
-            ) + get_sorted_dict(self.subfleet_sizes) + ")"
+            ) + get_sorted_dict_repr(self.subfleet_sizes) + ")"
         )
 
     def __eq__(self, fleet: Any) -> bool:
