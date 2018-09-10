@@ -182,6 +182,11 @@ class BattleshipsTest(unittest.TestCase):
         self.assertEqual(fleet.ship_lengths is ship_lengths, False)
         self.assertEqual(fleet.subfleet_sizes is subfleet_sizes, False)
 
+    def test_fleet_repr(self):
+        g_exp_fleet_exp_repr = "Fleet(ship_lengths=[4, 3, 2, 1], " \
+            "subfleet_sizes={4: 1, 3: 2, 2: 3, 1: 4})"
+        self.assertEqual(g_exp_fleet_exp_repr, g_exp_fleet.__repr__())
+
     def test_fleet_eq(self):
         fleet = bs.Fleet([4, 3, 2, 1], {4: 1, 3: 2, 2: 3, 1: 4})
         self.assertEqual(g_exp_fleet.__eq__(fleet), True)
