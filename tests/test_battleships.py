@@ -6,7 +6,14 @@ import unittest
 from battleships import battleships as bs
 
 
-TESTS_DIR = os.path.join(bs.BASE_DIR, 'tests')
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+SAMPLE_CONFIG_FILE_PATH = os.path.join(
+    BASE_DIR, 'tests/sample_configs/Battleships1.ini'
+)
+SAMPLE_CONFIG_FILE_PATH2 = os.path.join(
+    BASE_DIR, 'tests/sample_configs/Battleships2.ini'
+)
 
 
 class BattleshipsTest(unittest.TestCase):
@@ -14,10 +21,12 @@ class BattleshipsTest(unittest.TestCase):
     def setUp(self):
         global g_exp_board
         global g_exp_fleet
+        global config
         random.seed()
-        bs.FieldType = bs.get_redefined_FieldType()
-        sample_input_data = bs.get_data_from_file(
-            os.path.join(TESTS_DIR, 'board_samples/board02.txt')
+        config = bs.parse_config(SAMPLE_CONFIG_FILE_PATH)
+        bs.FieldType = bs.get_redefined_FieldType(config)
+        sample_input_data = bs.parse_game_data_file(
+            config["GAMEDATA"]["FILEPATH"]
         )
         g_exp_board = bs.get_board_from_input_data(*sample_input_data[0:4])
         g_exp_fleet = sample_input_data[4]
@@ -201,13 +210,13 @@ class BattleshipsTest(unittest.TestCase):
         self.assertEqual(g_exp_fleet is fleet, False)
 
     def test_get_redefined_FieldType(self):
-        FieldType = bs.get_redefined_FieldType()
+        FieldType = bs.get_redefined_FieldType(config)
         self.assertEqual(FieldType.SEA.value, '.')
         self.assertEqual(FieldType.SHIP.value, 'O')
         self.assertEqual(FieldType.UNKNOWN.value, 'x')
         self.assertEqual(FieldType.SEA.__repr__(), '<FieldType.SEA>')
 
-    def test_get_data_from_file(self):
+    def test_parse_game_data_file(self):
         exp_playfield = [[bs.FieldType.UNKNOWN] * 10 for _ in range(10)]
         exp_playfield[4][2] = bs.FieldType.SHIP
         exp_playfield[7][2] = bs.FieldType.SEA
@@ -216,9 +225,7 @@ class BattleshipsTest(unittest.TestCase):
         exp_playfield[9][4] = bs.FieldType.SHIP
         act_board_size, act_playfield, act_solution_pcs_in_rows, \
             act_solution_pcs_in_cols, act_fleet = \
-            bs.get_data_from_file(
-                os.path.join(TESTS_DIR, 'board_samples/board02.txt')
-            )
+            bs.parse_game_data_file(config["GAMEDATA"]["FILEPATH"])
         self.assertEqual(act_board_size, 10)
         self.assertEqual(act_playfield, exp_playfield)
         self.assertEqual(
@@ -864,7 +871,7 @@ class BattleshipsTest(unittest.TestCase):
             act_solutions, [self.parse_board(solution_board_repr)]
         )
 
-    def test_get_solutions_without_potential_ships_for_ship_pcs_positions(
+    def test_get_solution_boards_without_potential_ships(
         self
     ):
         ship_pcs_positions = bs.get_ship_pcs_positions(g_exp_board)
@@ -873,7 +880,7 @@ class BattleshipsTest(unittest.TestCase):
         bs.mark_uncovered_sea_positions(g_exp_board, ship_pcs_positions)
         act_board, act_fleet = g_exp_board.get_copy(), g_exp_fleet.get_copy()
         act_potential_ships_for_ship_pcs_positions = {}
-        act_solutions = bs.get_solutions(
+        act_solutions = bs.get_solution_boards(
             act_board, act_fleet, act_potential_ships_for_ship_pcs_positions
         )
         solution1 = (
@@ -970,7 +977,7 @@ class BattleshipsTest(unittest.TestCase):
         self.assertEqual(act_fleet, g_exp_fleet)
         self.assertEqual(act_potential_ships_for_ship_pcs_positions, {})
 
-    def test_get_solutions_with_potential_ships_for_ship_pcs_positions(self):
+    def test_get_solution_boards_with_potential_ships(self):
         ship_pcs_positions = bs.get_ship_pcs_positions(g_exp_board)
         for x, y in ship_pcs_positions:
             g_exp_board.playfield[x][y] = bs.FieldType.UNKNOWN
@@ -985,7 +992,7 @@ class BattleshipsTest(unittest.TestCase):
         exp_potential_ships_for_ship_pcs_positions = {
             **act_potential_ships_for_ship_pcs_positions
         }
-        act_solutions = bs.get_solutions(
+        act_solutions = bs.get_solution_boards(
             act_board, act_fleet, act_potential_ships_for_ship_pcs_positions
         )
         solution1 = (
@@ -1051,7 +1058,26 @@ class BattleshipsTest(unittest.TestCase):
             exp_potential_ships_for_ship_pcs_positions
         )
 
-    def test_get_solutions_for_input_file(self):
+    def test_parse_test_config(self):
+        self.assertEqual(
+            "/media/winshare/git/Battleships/tests/sample_boards/board01.txt",
+            config["GAMEDATA"]["FILEPATH"]
+        )
+        self.assertEqual("O", config["FIELDTYPESYMBOLS"]["SHIP"])
+        self.assertEqual(".", config["FIELDTYPESYMBOLS"]["SEA"])
+        self.assertEqual("x", config["FIELDTYPESYMBOLS"]["UNKNOWN"])
+
+    def test_parse_default_config(self):
+        default_config = bs.parse_config()
+        self.assertEqual(
+            "/media/winshare/git/Battleships/tests/sample_boards/board01.txt",
+            default_config["GAMEDATA"]["FILEPATH"]
+        )
+        self.assertEqual("O", default_config["FIELDTYPESYMBOLS"]["SHIP"])
+        self.assertEqual(".", default_config["FIELDTYPESYMBOLS"]["SEA"])
+        self.assertEqual("x", default_config["FIELDTYPESYMBOLS"]["UNKNOWN"])
+
+    def test_get_solutions_when_has_solutions(self):
         solution1 = (
             '═════════════════════════════════════════\n'
             ' .   .   .   .   .   .   .   .   .   .   ║(0)(0)\n'
@@ -1101,9 +1127,7 @@ class BattleshipsTest(unittest.TestCase):
             '(1) (1) (4) (1) (6) (1) (0) (2) (2) (2) \n'
         )
         self.assertEqual(
-            bs.get_solutions_for_input_file(
-                os.path.join(TESTS_DIR, 'board_samples/board02.txt')
-            ),
+            bs.get_solutions(SAMPLE_CONFIG_FILE_PATH),
             [
                 self.parse_board(solution1),
                 self.parse_board(solution2),
@@ -1111,5 +1135,10 @@ class BattleshipsTest(unittest.TestCase):
             ]
         )
 
-if __name__ == "__main__":
-    unittest.main()
+    def test_get_solutions_when_no_solutions(self):
+        self.assertEqual(
+            bs.get_solutions(SAMPLE_CONFIG_FILE_PATH2), []
+        )
+
+    def test_run(self):
+        bs.run()

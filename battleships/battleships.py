@@ -1,13 +1,7 @@
-import configparser
+from configparser import ConfigParser
 from enum import Enum
 import os
 from typing import List, Dict, Tuple, Optional, Union, Set, NamedTuple, Any
-
-
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-
-ini_config = configparser.ConfigParser()
-ini_config.read(os.path.join(BASE_DIR, 'Battleships.ini'))
 
 
 class FieldType(Enum):
@@ -64,8 +58,8 @@ class Board():
         playfield: List[List[FieldType]],
         rem_pcs_in_rows: List[int],
         rem_pcs_in_cols: List[int],
-        total_pcs_in_rows: Optional[List[int]] = None,
-        total_pcs_in_cols: Optional[List[int]] = None
+        total_pcs_in_rows: Optional[List[int]]=None,
+        total_pcs_in_cols: Optional[List[int]]=None
     ) -> None:
         """Board class constructor.
 
@@ -93,7 +87,7 @@ class Board():
         else:
             self.total_pcs_in_cols = [*self.rem_pcs_in_cols]
 
-    def repr(self, total_pcs_only: bool = False) -> str:
+    def repr(self, total_pcs_only: bool=False) -> str:
         """A convenient string representation of board data.
 
         total_pcs_only - Flag indicating whether only total required number of
@@ -114,9 +108,11 @@ class Board():
                 rep += '(' + str(self.total_pcs_in_rows[i]) + ')'
             else:
                 rep += (
-                    '(' + str(
-                        self.total_pcs_in_rows[i] - self.rem_pcs_in_rows[i]
-                    ) + ')(' + str(self.total_pcs_in_rows[i]) + ')'
+                    '(' +
+                    str(self.total_pcs_in_rows[i] - self.rem_pcs_in_rows[i]) +
+                    ')(' +
+                    str(self.total_pcs_in_rows[i]) +
+                    ')'
                 )
             rep += '\n'
         rep += '\u2550'
@@ -126,9 +122,9 @@ class Board():
         if not total_pcs_only:
             for j in range(1, self.size - 1):
                 rep += (
-                    '(' + str(
-                        self.total_pcs_in_cols[j] - self.rem_pcs_in_cols[j]
-                    ) + ') '
+                    '(' +
+                    str(self.total_pcs_in_cols[j] - self.rem_pcs_in_cols[j]) +
+                    ') '
                 )
             rep += '\n'
         for j in range(1, self.size - 1):
@@ -143,7 +139,7 @@ class Board():
     def __eq__(self, board: Any) -> bool:
         """Overrides the built-in class method."""
         return (
-            type(board) == self.__class__ and
+            isinstance(board, self.__class__) and
             board.size == self.size and
             board.playfield == self.playfield and
             board.rem_pcs_in_rows == self.rem_pcs_in_rows and
@@ -155,8 +151,11 @@ class Board():
     def get_copy(self) -> 'Board':
         """Returns a copy of this object."""
         return self.__class__(
-            self.size, self.playfield, self.rem_pcs_in_rows,
-            self.rem_pcs_in_cols, self.total_pcs_in_rows,
+            self.size,
+            self.playfield,
+            self.rem_pcs_in_rows,
+            self.rem_pcs_in_cols,
+            self.total_pcs_in_rows,
             self.total_pcs_in_cols
         )
 
@@ -212,13 +211,15 @@ class Fleet():
         return (
             "Fleet(ship_lengths={}, subfleet_sizes=".format(
                 self.ship_lengths
-            ) + get_sorted_dict_repr(self.subfleet_sizes) + ")"
+            ) +
+            get_sorted_dict_repr(self.subfleet_sizes) +
+            ")"
         )
 
     def __eq__(self, fleet: Any) -> bool:
         """Overrides the built-in class method."""
         return (
-            type(fleet) == self.__class__ and
+            isinstance(fleet, self.__class__) and
             fleet.ship_lengths == self.ship_lengths and
             fleet.subfleet_sizes == self.subfleet_sizes
         )
@@ -228,21 +229,21 @@ class Fleet():
         return self.__class__(self.ship_lengths, self.subfleet_sizes)
 
 
-def get_redefined_FieldType():
+def get_redefined_FieldType(config):
     """Returns the custom FieldType enum definition based on the
     Battleships.ini file configuration.
     """
     fieldtype_mappings = {}  # type: Dict[str, str]
     for field_name in [field_type.name for field_type in FieldType]:
         fieldtype_mappings[field_name] = \
-            ini_config['FIELDTYPESYMBOLS'][field_name]
+            config['FIELDTYPESYMBOLS'][field_name]
     redefined_FieldType = Enum('FieldType', fieldtype_mappings)
     redefined_FieldType.__repr__ = \
         lambda self: '<FieldType.{}>'.format(self.name)
     return redefined_FieldType
 
 
-def get_data_from_file(input_file_uri: str) -> Tuple[
+def parse_game_data_file(input_file_uri: str) -> Tuple[
     int, List[List[FieldType]], List[int], List[int], Fleet
 ]:
     """Returns a tuple of data contained in the input file.
@@ -446,9 +447,8 @@ def mark_ship(board: Board, ship: Ship) -> None:
             board.playfield[ship.x - 1][col] = FieldType.SEA
             board.playfield[ship.x + 1][col] = FieldType.SEA
         board.playfield[ship.x][ship.y - 1] = FieldType.SEA
-        board.playfield[ship.x][ship.y:ship.y + ship.length] = (
+        board.playfield[ship.x][ship.y:ship.y + ship.length] = \
             [FieldType.SHIP] * ship.length
-        )
         board.playfield[ship.x][ship.y + ship.length] = FieldType.SEA
     else:
         for row in range(ship.x - 1, ship.x + ship.length + 1):
@@ -560,10 +560,16 @@ def reduce_potential_ships_for_ship_pcs_positions(
     """
     for x, y in ship_pcs_positions:
         if (
-            (ship.direction == Direction.RIGHT and x == ship.x and
-                ship.y <= y < ship.y + ship.length) or
-            (ship.direction == Direction.DOWN and y == ship.y and
-                ship.x <= x < ship.x + ship.length)
+            (
+                ship.direction == Direction.RIGHT and
+                x == ship.x and
+                ship.y <= y < ship.y + ship.length
+            ) or
+            (
+                ship.direction == Direction.DOWN and
+                y == ship.y and
+                ship.x <= x < ship.x + ship.length
+            )
         ):
             potential_ships_for_ship_pcs_positions[(x, y)].remove(ship)
             if len(potential_ships_for_ship_pcs_positions[(x, y)]) == 0:
@@ -591,7 +597,8 @@ def mark_uncovered_ships(
             ship = potential_ships_for_ship_pcs_positions[(x, y)][0]
             mark_ships(board, fleet, [ship])
             reduce_potential_ships_for_ship_pcs_positions(
-                ship_pcs_positions, potential_ships_for_ship_pcs_positions,
+                ship_pcs_positions,
+                potential_ships_for_ship_pcs_positions,
                 ship
             )
 
@@ -678,7 +685,7 @@ def find_and_add_solutions(
                         solutions.append(new_board)
 
 
-def get_solutions(
+def get_solution_boards(
     board: Board,
     fleet: Fleet,
     potential_ships_for_ship_pcs_positions: Dict[Tuple[int, int], List[Ship]]
@@ -704,12 +711,11 @@ def get_solutions(
         """
         combination_fleet_sizes = {}  # type: Dict[int, int]
         for ship in ship_combination:
-            combination_fleet_sizes[ship.length] = (
+            combination_fleet_sizes[ship.length] = \
                 combination_fleet_sizes.get(ship.length, 0) + 1
-            )
             if (
                 combination_fleet_sizes[ship.length] >
-                    fleet.subfleet_sizes[ship.length]
+                fleet.subfleet_sizes[ship.length]
             ):
                 return True
         return False
@@ -730,16 +736,28 @@ def get_solutions(
     return solutions
 
 
-def get_solutions_for_input_file(input_file_uri: str) -> List[Board]:
-    """Returns a list of solutions for input parameters given in the file at
-    location 'input_file_uri'.
+def parse_config(config_file_path=None):
+    if not config_file_path:
+        config_file_path = os.path.join(
+            os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+            'Battleships.ini'
+        )
+    config = ConfigParser()
+    config.read(config_file_path)
+    return config
 
-    input_file_uri - URI of file containing board and fleet data.
+
+def get_solutions(config_file_path: str=None) -> List[Board]:
+    """Returns a list of solutions for input parameters given in the file at
+    location 'game_data_file_path'.
+
+    game_data_file_path - URI of file containing board and fleet data.
     """
+    config = parse_config(config_file_path)
     global FieldType
-    FieldType = get_redefined_FieldType()
+    FieldType = get_redefined_FieldType(config)
     board_size, playfield, solution_pcs_in_rows, solution_pcs_in_cols, \
-        fleet = get_data_from_file(input_file_uri)
+        fleet = parse_game_data_file(config["GAMEDATA"]["FILEPATH"])
     board = get_board_from_input_data(
         board_size, playfield, solution_pcs_in_rows, solution_pcs_in_cols
     )
@@ -752,18 +770,18 @@ def get_solutions_for_input_file(input_file_uri: str) -> List[Board]:
             board, fleet, ship_pcs_positions
         )
     mark_uncovered_ships(
-        board, fleet, ship_pcs_positions,
+        board,
+        fleet,
+        ship_pcs_positions,
         potential_ships_for_ship_pcs_positions
     )
-    return get_solutions(board, fleet, potential_ships_for_ship_pcs_positions)
+    return get_solution_boards(
+        board, fleet, potential_ships_for_ship_pcs_positions
+    )
 
 
-def main(input_file_uri: str) -> None:
-    """Main function. Defined separately for diagnostic purposes.
-
-    input_file_uri - URI of file containing board and fleet data
-    """
-    solutions = get_solutions_for_input_file(input_file_uri)
+def run():
+    solutions = get_solutions()
     for solution in solutions:
         print(solution.repr(True))
     if solutions:
@@ -773,4 +791,4 @@ def main(input_file_uri: str) -> None:
 
 
 if __name__ == "__main__":
-    main(ini_config['INPUTFILE']['PATH'])
+    run()
