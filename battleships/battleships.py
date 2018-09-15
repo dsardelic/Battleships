@@ -1,7 +1,10 @@
+"""Battleship puzzle solver."""
+
 from configparser import ConfigParser
 from enum import Enum
 import os
-from typing import List, Dict, Tuple, Optional, Union, Set, NamedTuple, Any
+from typing import List, Dict, Tuple, Optional, Union, Set, NamedTuple, Any, \
+    cast
 
 
 class FieldType(Enum):
@@ -23,13 +26,27 @@ class Direction(Enum):
 
 
 Ship = NamedTuple(
-    'Ship',
+    "Ship",
     [('x', int), ('y', int), ('length', int), ('direction', Direction)]
 )
 
 
-class Board():
-    """Class containing board data.
+class Fleet(
+    NamedTuple(
+        "Fleet",
+        [("ship_lengths", List[int]), ("subfleet_sizes", Dict[int, int])]
+    )
+):
+    """Class representing a fleet of ships of various lenghts."""
+    __slots__ = ()
+
+    def get_copy(self):
+        """Returns a copy of this fleet object."""
+        return Fleet([*self.ship_lengths], {**self.subfleet_sizes})
+
+
+class Board:
+    """Class representing board data.
 
     For practical reasons the playfield actually contains two additional rows
     and two additional columns more than the actual playfield. Therefore, the
@@ -61,7 +78,7 @@ class Board():
         total_pcs_in_rows: Optional[List[int]]=None,
         total_pcs_in_cols: Optional[List[int]]=None
     ) -> None:
-        """Board class constructor.
+        """Initializes a new Board object.
 
         size - Number of playfield rows and columns.
         playfield - 2D list of variables of type FieldType.
@@ -136,17 +153,19 @@ class Board():
         """Overrides the built-in class method."""
         return self.repr()
 
-    def __eq__(self, board: Any) -> bool:
+    def __eq__(self, other: Any) -> bool:
         """Overrides the built-in class method."""
-        return (
-            isinstance(board, self.__class__) and
-            board.size == self.size and
-            board.playfield == self.playfield and
-            board.rem_pcs_in_rows == self.rem_pcs_in_rows and
-            board.rem_pcs_in_cols == self.rem_pcs_in_cols and
-            board.total_pcs_in_rows == self.total_pcs_in_rows and
-            board.total_pcs_in_cols == self.total_pcs_in_cols
-        )
+        if isinstance(other, self.__class__):
+            other = cast(Board, other)
+            return (
+                other.size == self.size and
+                other.playfield == self.playfield and
+                other.rem_pcs_in_rows == self.rem_pcs_in_rows and
+                other.rem_pcs_in_cols == self.rem_pcs_in_cols and
+                other.total_pcs_in_rows == self.total_pcs_in_rows and
+                other.total_pcs_in_cols == self.total_pcs_in_cols
+            )
+        return False
 
     def get_copy(self) -> 'Board':
         """Returns a copy of this object."""
@@ -160,76 +179,7 @@ class Board():
         )
 
 
-class Fleet():
-    """Class containing ship fleet data.
-
-    Class instance attributes:
-    ship_lengths - List of distinct lengths of fleet ships. Should be sorted in
-        descending order so that locations of ships with maximum information
-        content are determined first.
-    subfleet_sizes - Dictionary of total number of fleet ships of particular
-        length (i.e. size of subfleet) for each ship length (i.e. subfleet ship
-        type).
-    """
-
-    def __init__(
-        self,
-        ship_lengths: List[int],
-        subfleet_sizes: Dict[int, int]
-    ) -> None:
-        """Fleet class constructor.
-
-        ship_lengths - List of distinct lengths of fleet ships.
-        subfleet_sizes - Dictionary of total number of fleet ships of
-            particular length (i.e. size of subfleet) for each ship length
-            (i.e. subfleet ship type).
-        """
-        self.ship_lengths = sorted([*ship_lengths], reverse=True)
-        self.subfleet_sizes = {**subfleet_sizes}
-
-    def __repr__(self):
-        """Overrides the built-in class method."""
-        def get_sorted_dict_repr(d: Dict[int, int]) -> str:
-            """Returns a text representation of a dictionary sorted by its keys
-            in descending order.
-            """
-            import functools
-            import operator
-            return (
-                "{" +
-                functools.reduce(
-                    operator.add,
-                    [
-                        str(key) + ": " + str(d[key]) + ", "
-                        for key in sorted(d.keys(), reverse=True)
-                    ],
-                    ""
-                )[:-2] +
-                "}"
-            )
-
-        return (
-            "Fleet(ship_lengths={}, subfleet_sizes=".format(
-                self.ship_lengths
-            ) +
-            get_sorted_dict_repr(self.subfleet_sizes) +
-            ")"
-        )
-
-    def __eq__(self, fleet: Any) -> bool:
-        """Overrides the built-in class method."""
-        return (
-            isinstance(fleet, self.__class__) and
-            fleet.ship_lengths == self.ship_lengths and
-            fleet.subfleet_sizes == self.subfleet_sizes
-        )
-
-    def get_copy(self) -> 'Fleet':
-        """Returns a copy of this object."""
-        return self.__class__(self.ship_lengths, self.subfleet_sizes)
-
-
-def get_redefined_FieldType(config):
+def get_redefined_fieldtype_enum(config) -> FieldType:  # type: ignore
     """Returns the custom FieldType enum definition based on the
     Battleships.ini file configuration.
     """
@@ -237,10 +187,10 @@ def get_redefined_FieldType(config):
     for field_name in [field_type.name for field_type in FieldType]:
         fieldtype_mappings[field_name] = \
             config['FIELDTYPESYMBOLS'][field_name]
-    redefined_FieldType = Enum('FieldType', fieldtype_mappings)
-    redefined_FieldType.__repr__ = \
+    fieldtype = Enum('FieldType', fieldtype_mappings)
+    fieldtype.__repr__ = \
         lambda self: '<FieldType.{}>'.format(self.name)
-    return redefined_FieldType
+    return fieldtype
 
 
 def parse_game_data_file(input_file_uri: str) -> Tuple[
@@ -260,7 +210,7 @@ def parse_game_data_file(input_file_uri: str) -> Tuple[
             )
             ship_lengths.append(ship_length)
             subfleet_sizes[ship_length] = subfleet_size
-        fleet = Fleet(ship_lengths, subfleet_sizes)
+        fleet = Fleet(sorted(ship_lengths, reverse=True), subfleet_sizes)
         board_size = int(next(file).strip())
         solution_pcs_in_rows = [int(x) for x in next(file).strip().split()]
         solution_pcs_in_cols = [int(x) for x in next(file).strip().split()]
@@ -400,7 +350,7 @@ def can_fit_ship_on_board(board: Board, ship: Ship) -> bool:
     return True
 
 
-def reduce_board_rem_pcs_and_mark_sea_in_filled_rows_and_cols(
+def reduce_rem_pcs_and_mark_sea(
     board: Board, ship: Ship
 ) -> None:
     """For each ship piece checks if corresponding row and column are filled
@@ -478,44 +428,44 @@ def mark_ships(
             return False
         mark_ship(board, ship)
         fleet.subfleet_sizes[ship.length] -= 1
-        reduce_board_rem_pcs_and_mark_sea_in_filled_rows_and_cols(board, ship)
+        reduce_rem_pcs_and_mark_sea(board, ship)
     return True
 
 
-def get_potential_ships_for_ship_piece_position(
+def get_ships_for_field(
     board: Board,
-    x: int,
-    y: int,
+    row: int,
+    col: int,
     ship_length: int
 ) -> List[Ship]:
     """Returns a list of ships of length ship_length that can each potentially
     be placed onto the board so that one ship piece occupies the board field
-    at coordinates (x, y).
+    at coordinates (row, col).
 
     board - The board onto which to check ship placement.
-    x - Board playfield field row index.
-    y - Board playfield field column index.
+    row - Board playfield field row index.
+    col - Board playfield field column index.
     ship_length - The required ship length.
     """
     ships = []  # type: List[Ship]
-    if ship_length <= board.rem_pcs_in_rows[x]:
-        min_y = max(y - (ship_length - 1), 0)
-        max_y = min(y, board.size - 1 - ship_length)
+    if ship_length <= board.rem_pcs_in_rows[row]:
+        min_y = max(col - (ship_length - 1), 0)
+        max_y = min(col, board.size - 1 - ship_length)
         for i in range(min_y, max_y + 1):
-            ship = Ship(x, i, ship_length, Direction.RIGHT)
+            ship = Ship(row, i, ship_length, Direction.RIGHT)
             if can_fit_ship_on_board(board, ship):
                 ships.append(ship)
-    if ship_length <= board.rem_pcs_in_cols[y] and ship_length > 1:
-        min_x = max(x - (ship_length - 1), 0)
-        max_x = min(x, board.size - 1 - ship_length)
+    if ship_length <= board.rem_pcs_in_cols[col] and ship_length > 1:
+        min_x = max(row - (ship_length - 1), 0)
+        max_x = min(row, board.size - 1 - ship_length)
         for i in range(min_x, max_x + 1):
-            ship = Ship(i, y, ship_length, Direction.DOWN)
+            ship = Ship(i, col, ship_length, Direction.DOWN)
             if can_fit_ship_on_board(board, ship):
                 ships.append(ship)
     return ships
 
 
-def get_potential_ships_for_ship_pcs_positions(
+def get_potential_ships_for_field(
     board: Board,
     fleet: Fleet,
     ship_pcs_positions: List[Tuple[int, int]]
@@ -528,77 +478,76 @@ def get_potential_ships_for_ship_pcs_positions(
     fleet - The fleet of ships yet to be marked onto the board.
     ship_pcs_positions - Coordinates of board fields containing ship pieces.
     """
-    potential_ships_for_ship_pcs_positions = {} \
+    ships_mappings = {} \
         # type: Dict[Tuple[int, int], List[Ship]]
-    for x, y in ship_pcs_positions:
+    for row, col in ship_pcs_positions:
         for ship_length in fleet.ship_lengths:
             if fleet.subfleet_sizes[ship_length] > 0:
-                potential_ships_for_ship_pcs_positions[(x, y)] = \
-                    potential_ships_for_ship_pcs_positions.get((x, y), []) + \
-                    get_potential_ships_for_ship_piece_position(
-                        board, x, y, ship_length
-                    )
-    return potential_ships_for_ship_pcs_positions
+                ships_mappings[(row, col)] = (
+                    ships_mappings.get((row, col), []) +
+                    get_ships_for_field(board, row, col, ship_length)
+                )
+    return ships_mappings
 
 
-def reduce_potential_ships_for_ship_pcs_positions(
+def reduce_potential_ships(
     ship_pcs_positions: List[Tuple[int, int]],
-    potential_ships_for_ship_pcs_positions: Dict[Tuple[int, int], List[Ship]],
+    potential_ships_for_field: Dict[Tuple[int, int], List[Ship]],
     ship: Ship
 ) -> None:
-    """Removes from potential_ships_for_ship_pcs_positions all occurences of
+    """Removes from potential_ships_for_field all occurences of
     'ship'. If after removing there are no other potential ships for given
     coordinates, remove the coordinates and associated empty list from ships
     list for the ship piece coordinates.
 
     ship_pcs_positions - Coordinates of board fields containing ship pieces.
-    potential_ships_for_ship_pcs_positions - Dictionary mapping each field in
+    potential_ships_for_field - Dictionary mapping each field in
         ship_pcs_positions to a list of ships that can each potentially be
         placed onto the board so that one ship piece occupies that particular
         field.
-    ship - The ship to validate potential_ships_for_ship_pcs_positions against.
+    ship - The ship to validate potential_ships_for_field against.
     """
-    for x, y in ship_pcs_positions:
+    for row, col in ship_pcs_positions:
         if (
             (
                 ship.direction == Direction.RIGHT and
-                x == ship.x and
-                ship.y <= y < ship.y + ship.length
+                row == ship.x and
+                ship.y <= col < ship.y + ship.length
             ) or
             (
                 ship.direction == Direction.DOWN and
-                y == ship.y and
-                ship.x <= x < ship.x + ship.length
+                col == ship.y and
+                ship.x <= row < ship.x + ship.length
             )
         ):
-            potential_ships_for_ship_pcs_positions[(x, y)].remove(ship)
-            if len(potential_ships_for_ship_pcs_positions[(x, y)]) == 0:
-                del(potential_ships_for_ship_pcs_positions[(x, y)])
+            potential_ships_for_field[(row, col)].remove(ship)
+            if len(potential_ships_for_field[(row, col)]) == 0:
+                del potential_ships_for_field[(row, col)]
 
 
 def mark_uncovered_ships(
     board: Board,
     fleet: Fleet,
     ship_pcs_positions: List[Tuple[int, int]],
-    potential_ships_for_ship_pcs_positions: Dict[Tuple[int, int], List[Ship]]
+    potential_ships_for_field: Dict[Tuple[int, int], List[Ship]]
 ) -> None:
     """Marks ships onto board on those coordinates on which only one ship from
-    potential_ships_for_ship_pcs_positions can be placed and updates fleet
+    potential_ships_for_field can be placed and updates fleet
     accordingly.
 
     board - The board onto which to mark ships.
     fleet - The fleet of ships yet to be marked onto the board.
     ship_pcs_positions - Coordinates of board fields containing ship pieces.
-    potential_ships_for_ship_pcs_positions - Dictionary of potential ships
+    potential_ships_for_field - Dictionary of potential ships
         which can be placed on a particular field containing any ship piece.
     """
-    for x, y in ship_pcs_positions:
-        if len(potential_ships_for_ship_pcs_positions[(x, y)]) == 1:
-            ship = potential_ships_for_ship_pcs_positions[(x, y)][0]
+    for row, col in ship_pcs_positions:
+        if len(potential_ships_for_field[(row, col)]) == 1:
+            ship = potential_ships_for_field[(row, col)][0]
             mark_ships(board, fleet, [ship])
-            reduce_potential_ships_for_ship_pcs_positions(
+            reduce_potential_ships(
                 ship_pcs_positions,
-                potential_ships_for_ship_pcs_positions,
+                potential_ships_for_field,
                 ship
             )
 
@@ -613,7 +562,7 @@ def get_potential_ships_of_length(
     board - The board against which to check ship placement.
     ship_length - Length of ship.
     """
-    potential_subfleet_ship_positions = []  # type: List[Ship]
+    potential_ships = []  # type: List[Ship]
     for row in range(1, board.size - 1):
         for col in range(1, board.size - 1):
             if board.playfield[row][col] == FieldType.UNKNOWN:
@@ -623,7 +572,7 @@ def get_potential_ships_of_length(
                 ):
                     ship = Ship(row, col, ship_length, Direction.RIGHT)
                     if can_fit_ship_on_board(board, ship):
-                        potential_subfleet_ship_positions.append(ship)
+                        potential_ships.append(ship)
                 if (
                     ship_length <= board.rem_pcs_in_cols[col] and
                     row + ship_length < board.size and
@@ -631,8 +580,8 @@ def get_potential_ships_of_length(
                 ):
                     ship = Ship(row, col, ship_length, Direction.DOWN)
                     if can_fit_ship_on_board(board, ship):
-                        potential_subfleet_ship_positions.append(ship)
-    return potential_subfleet_ship_positions
+                        potential_ships.append(ship)
+    return potential_ships
 
 
 def find_and_add_solutions(
@@ -669,10 +618,8 @@ def find_and_add_solutions(
                 else:
                     solutions.append(new_board)
         else:
-            import sys
-            if 'combinations' not in sys.modules:
-                from itertools import combinations
-            for ship_combination in combinations(
+            import itertools
+            for ship_combination in itertools.combinations(
                 potential_ships, subfleet_size
             ):
                 new_board, new_fleet = board.get_copy(), fleet.get_copy()
@@ -688,7 +635,7 @@ def find_and_add_solutions(
 def get_solution_boards(
     board: Board,
     fleet: Fleet,
-    potential_ships_for_ship_pcs_positions: Dict[Tuple[int, int], List[Ship]]
+    potential_ships_for_field: Dict[Tuple[int, int], List[Ship]]
 ) -> List[Board]:
     """Returns a list of solutions for given board, given fleet and given list
     of potential ships that occupy board positions where ship pieces are
@@ -696,7 +643,7 @@ def get_solution_boards(
 
     board - Board for which to find solutions.
     fleet - Fleet of ships to be marked onto the board.
-    potential_ships_for_ship_pcs_positions - Dictionary of potential ships that
+    potential_ships_for_field - Dictionary of potential ships that
         can be placed on a particular board field containing any ship piece.
     """
     def ship_combination_exceeds_fleet(
@@ -721,12 +668,12 @@ def get_solution_boards(
         return False
 
     solutions = []  # type: List[Board]
-    if len(potential_ships_for_ship_pcs_positions) == 0:
+    if len(potential_ships_for_field) == 0:
         find_and_add_solutions(board, fleet, 0, solutions)
     else:
         from itertools import product
         for ship_combination in product(
-            *potential_ships_for_ship_pcs_positions.values()
+            *potential_ships_for_field.values()
         ):
             ship_combination = set(ship_combination)
             if not ship_combination_exceeds_fleet(fleet, ship_combination):
@@ -737,6 +684,7 @@ def get_solution_boards(
 
 
 def parse_config(config_file_path=None):
+    """Parses the input config file and returns a config object."""
     if not config_file_path:
         config_file_path = os.path.join(
             os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
@@ -755,7 +703,7 @@ def get_solutions(config_file_path: str=None) -> List[Board]:
     """
     config = parse_config(config_file_path)
     global FieldType
-    FieldType = get_redefined_FieldType(config)
+    FieldType = get_redefined_fieldtype_enum(config)  # type: ignore
     board_size, playfield, solution_pcs_in_rows, solution_pcs_in_cols, \
         fleet = parse_game_data_file(config["GAMEDATA"]["FILEPATH"])
     board = get_board_from_input_data(
@@ -763,24 +711,25 @@ def get_solutions(config_file_path: str=None) -> List[Board]:
     )
     ship_pcs_positions = get_ship_pcs_positions(board)
     mark_uncovered_sea_positions(board, ship_pcs_positions)
-    for x, y in ship_pcs_positions:
-        board.playfield[x][y] = FieldType.UNKNOWN
-    potential_ships_for_ship_pcs_positions = \
-        get_potential_ships_for_ship_pcs_positions(
-            board, fleet, ship_pcs_positions
-        )
+    for row, col in ship_pcs_positions:
+        board.playfield[row][col] = FieldType.UNKNOWN
+    potential_ships_for_field = get_potential_ships_for_field(
+        board, fleet, ship_pcs_positions
+    )
     mark_uncovered_ships(
         board,
         fleet,
         ship_pcs_positions,
-        potential_ships_for_ship_pcs_positions
+        potential_ships_for_field
     )
     return get_solution_boards(
-        board, fleet, potential_ships_for_ship_pcs_positions
+        board, fleet, potential_ships_for_field
     )
 
 
 def run():
+    """Searches for and prints the slutions."""
+
     solutions = get_solutions()
     for solution in solutions:
         print(solution.repr(True))

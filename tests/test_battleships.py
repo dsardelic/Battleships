@@ -24,7 +24,7 @@ class BattleshipsTest(unittest.TestCase):
         global config
         random.seed()
         config = bs.parse_config(SAMPLE_CONFIG_FILE_PATH)
-        bs.FieldType = bs.get_redefined_FieldType(config)
+        bs.FieldType = bs.get_redefined_fieldtype_enum(config)
         sample_input_data = bs.parse_game_data_file(
             config["GAMEDATA"]["FILEPATH"]
         )
@@ -210,7 +210,7 @@ class BattleshipsTest(unittest.TestCase):
         self.assertEqual(g_exp_fleet is fleet, False)
 
     def test_get_redefined_FieldType(self):
-        FieldType = bs.get_redefined_FieldType(config)
+        FieldType = bs.get_redefined_fieldtype_enum(config)
         self.assertEqual(FieldType.SEA.value, '.')
         self.assertEqual(FieldType.SHIP.value, 'O')
         self.assertEqual(FieldType.UNKNOWN.value, 'x')
