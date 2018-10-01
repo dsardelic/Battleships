@@ -26,7 +26,7 @@ class BattleshipsTest(unittest.TestCase):
         config = bs.parse_config(SAMPLE_CONFIG_FILE_PATH)
         bs.FieldType = bs.get_redefined_fieldtypes(config)
         game_data = bs.parse_game_data_file(config["GAMEDATA"]["FILEPATH"])
-        g_exp_board = bs.get_board(*game_data[0:4])
+        g_exp_board = bs.get_board(*game_data[1:4])
         g_exp_fleet = game_data[4]
         unittest.TestCase.setUp(self)
 
@@ -65,12 +65,7 @@ class BattleshipsTest(unittest.TestCase):
                     total_pcs_in_cols[i] - pcs_in_cols[i]
                     for i in range(len(total_pcs_in_cols))
                 ]
-        board = bs.get_board(
-            lines_count - 4,
-            playfield,
-            rem_pcs_in_rows,
-            rem_pcs_in_cols
-        )
+        board = bs.get_board(playfield, rem_pcs_in_rows, rem_pcs_in_cols)
         board.total_pcs_in_rows = [0, *total_pcs_in_rows, 0]
         board.total_pcs_in_cols = [0, *total_pcs_in_cols, 0]
         return board
@@ -86,7 +81,7 @@ class BattleshipsTest(unittest.TestCase):
         ]
         rem_pcs_in_rows = [random.randrange(size - 5) for _ in range(size)]
         rem_pcs_in_cols = [random.randrange(size - 5) for _ in range(size)]
-        board = bs.Board(size, playfield, rem_pcs_in_rows, rem_pcs_in_cols)
+        board = bs.Board(playfield, rem_pcs_in_rows, rem_pcs_in_cols)
         self.assertEqual(board.size, size)
         self.assertEqual(board.playfield, playfield)
         self.assertEqual(board.rem_pcs_in_rows, rem_pcs_in_rows)
@@ -102,8 +97,11 @@ class BattleshipsTest(unittest.TestCase):
         total_pcs_in_rows = [x + random.randrange(5) for x in rem_pcs_in_rows]
         total_pcs_in_cols = [x + random.randrange(5) for x in rem_pcs_in_cols]
         board = bs.Board(
-            size, playfield, rem_pcs_in_rows, rem_pcs_in_cols,
-            total_pcs_in_rows, total_pcs_in_cols
+            playfield,
+            rem_pcs_in_rows,
+            rem_pcs_in_cols,
+            total_pcs_in_rows,
+            total_pcs_in_cols
         )
         self.assertEqual(board.total_pcs_in_rows, total_pcs_in_rows)
         self.assertEqual(board.total_pcs_in_cols, total_pcs_in_cols)
@@ -159,7 +157,6 @@ class BattleshipsTest(unittest.TestCase):
         playfield[8][8] = bs.FieldType.SEA
         playfield[10][5] = bs.FieldType.SHIP
         board = bs.Board(
-            12,
             playfield,
             [0, 0, 1, 3, 3, 1, 1, 2, 2, 0, 7, 0],
             [0, 1, 1, 4, 1, 6, 1, 0, 2, 2, 2, 0]
@@ -215,7 +212,6 @@ class BattleshipsTest(unittest.TestCase):
         )
 
     def test_get_board_from_input_data(self):
-        board_size = 10
         playfield = [[bs.FieldType.UNKNOWN] * 10 for _ in range(10)]
         playfield[4][2] = bs.FieldType.SHIP
         playfield[7][2] = bs.FieldType.SEA
@@ -225,7 +221,6 @@ class BattleshipsTest(unittest.TestCase):
         rem_pcs_in_rows = [0, 1, 3, 3, 1, 1, 2, 2, 0, 7]
         rem_pcs_in_cols = [1, 1, 4, 1, 6, 1, 0, 2, 2, 2]
 
-        exp_board_size = 12
         exp_playfield = [[bs.FieldType.UNKNOWN] * 12 for _ in range(12)]
         for i in range(12):
             exp_playfield[i][0] = bs.FieldType.SEA
@@ -241,13 +236,8 @@ class BattleshipsTest(unittest.TestCase):
         exp_rem_pcs_in_cols = [0, 1, 1, 4, 1, 6, 1, 0, 2, 2, 2, 0]
 
         self.assertEqual(
-            bs.get_board(
-                board_size, playfield, rem_pcs_in_rows, rem_pcs_in_cols
-            ),
-            bs.Board(
-                exp_board_size, exp_playfield, exp_rem_pcs_in_rows,
-                exp_rem_pcs_in_cols
-            )
+            bs.get_board(playfield, rem_pcs_in_rows, rem_pcs_in_cols),
+            bs.Board(exp_playfield, exp_rem_pcs_in_rows, exp_rem_pcs_in_cols)
         )
 
     def test_get_ship_pcs_positions(self):
@@ -553,11 +543,7 @@ class BattleshipsTest(unittest.TestCase):
             (5, 3, 1): [bs.Ship(5, 3, 1, bs.Direction.RIGHT)]
         }
         for params, value in test_data.items():
-            self.assertEqual(
-                bs.get_field_ships(
-                    act_board, *params),
-                value
-            )
+            self.assertEqual(bs.get_field_ships(act_board, *params), value)
             self.assertEqual(act_board, g_exp_board)
 
         g_exp_board.playfield[10][5] = bs.FieldType.UNKNOWN
@@ -578,11 +564,7 @@ class BattleshipsTest(unittest.TestCase):
             (10, 5, 1): [bs.Ship(10, 5, 1, bs.Direction.RIGHT)]
         }
         for params, value in test_data.items():
-            self.assertEqual(
-                bs.get_field_ships(
-                    act_board, *params),
-                value
-            )
+            self.assertEqual(bs.get_field_ships(act_board, *params), value)
             self.assertEqual(act_board, g_exp_board)
 
     def test_get_ships_for_ship_pcs_positions(self):
@@ -650,13 +632,11 @@ class BattleshipsTest(unittest.TestCase):
             ]
         }
         bs.remove_ship_from_mappings(
-            act_ship_pcs_positions, act_ships_for_ship_pcs_positions,
-            ship
+            act_ship_pcs_positions, act_ships_for_ship_pcs_positions, ship
         )
         self.assertEqual(act_ship_pcs_positions, exp_ship_pcs_positions)
         self.assertEqual(
-            act_ships_for_ship_pcs_positions,
-            exp_ships_for_ship_pcs_positions
+            act_ships_for_ship_pcs_positions, exp_ships_for_ship_pcs_positions
         )
 
     def test_reduce_ships_for_ship_pcs_positions_with_delete(self):
@@ -671,13 +651,11 @@ class BattleshipsTest(unittest.TestCase):
             (5, 3): [bs.Ship(5, 3, 2, bs.Direction.RIGHT)]
         }
         bs.remove_ship_from_mappings(
-            act_ship_pcs_positions, act_ships_for_ship_pcs_positions,
-            ship
+            act_ship_pcs_positions, act_ships_for_ship_pcs_positions, ship
         )
         self.assertEqual(act_ship_pcs_positions, exp_ship_pcs_positions)
         self.assertEqual(
-            act_ships_for_ship_pcs_positions,
-            exp_ships_for_ship_pcs_positions
+            act_ships_for_ship_pcs_positions, exp_ships_for_ship_pcs_positions
         )
 
     def test_mark_uncovered_ships(self):
@@ -694,7 +672,9 @@ class BattleshipsTest(unittest.TestCase):
         }
         act_board, act_fleet = g_exp_board.get_copy(), g_exp_fleet.get_copy()
         bs.mark_uncovered_ships(
-            act_board, act_fleet, act_ship_pcs_positions,
+            act_board,
+            act_fleet,
+            act_ship_pcs_positions,
             act_ships_for_ship_pcs_positions
         )
         exp_board_repr = (
@@ -764,8 +744,7 @@ class BattleshipsTest(unittest.TestCase):
         }
         for ship_length, ships in test_data.items():
             self.assertEqual(
-                bs.get_ships_of_length(act_board, ship_length),
-                ships
+                bs.get_ships_of_length(act_board, ship_length), ships
             )
             self.assertEqual(act_board, g_exp_board)
 
@@ -797,9 +776,7 @@ class BattleshipsTest(unittest.TestCase):
         act_fleet = bs.Fleet([4, 3, 2, 1], {4: 1, 3: 0, 2: 1, 1: 0})
         exp_fleet = act_fleet.get_copy()
         act_solutions = []
-        bs.find_solutions_for_subfleet(
-            act_board, act_fleet, 0, act_solutions
-        )
+        bs.find_solutions_for_subfleet(act_board, act_fleet, 0, act_solutions)
         self.assertEqual(act_board, exp_board)
         self.assertEqual(act_fleet, exp_fleet)
         self.assertEqual(
@@ -838,9 +815,7 @@ class BattleshipsTest(unittest.TestCase):
         act_fleet = bs.Fleet([4, 3, 2, 1], {4: 1, 3: 1, 2: 2, 1: 1})
         exp_fleet = act_fleet.get_copy()
         act_solutions = []
-        bs.find_solutions_for_subfleet(
-            act_board, act_fleet, 0, act_solutions
-        )
+        bs.find_solutions_for_subfleet(act_board, act_fleet, 0, act_solutions)
         self.assertEqual(act_board, exp_board)
         self.assertEqual(act_fleet, exp_fleet)
         self.assertEqual(
@@ -959,15 +934,10 @@ class BattleshipsTest(unittest.TestCase):
             g_exp_board.playfield[x][y] = bs.FieldType.UNKNOWN
         bs.mark_uncovered_sea_positions(g_exp_board, ship_pcs_positions)
         act_board, act_fleet = g_exp_board.get_copy(), g_exp_fleet.get_copy()
-        act_ships_for_ship_pcs_positions = \
-            bs.get_fields_ships_mappings(
-                g_exp_board,
-                g_exp_fleet,
-                ship_pcs_positions
-            )
-        exp_ships_for_ship_pcs_positions = {
-            **act_ships_for_ship_pcs_positions
-        }
+        act_ships_for_ship_pcs_positions = bs.get_fields_ships_mappings(
+            g_exp_board, g_exp_fleet, ship_pcs_positions
+        )
+        exp_ships_for_ship_pcs_positions = {**act_ships_for_ship_pcs_positions}
         act_solutions = bs.get_solutions_for_mappings(
             act_board, act_fleet, act_ships_for_ship_pcs_positions
         )
@@ -1030,8 +1000,7 @@ class BattleshipsTest(unittest.TestCase):
         self.assertEqual(act_board, g_exp_board)
         self.assertEqual(act_fleet, g_exp_fleet)
         self.assertEqual(
-            act_ships_for_ship_pcs_positions,
-            exp_ships_for_ship_pcs_positions
+            act_ships_for_ship_pcs_positions, exp_ships_for_ship_pcs_positions
         )
 
     def test_parse_test_config(self):
@@ -1112,9 +1081,7 @@ class BattleshipsTest(unittest.TestCase):
         )
 
     def test_get_solutions_when_no_solutions(self):
-        self.assertEqual(
-            bs.get_solutions(SAMPLE_CONFIG_FILE_PATH2), []
-        )
+        self.assertEqual(bs.get_solutions(SAMPLE_CONFIG_FILE_PATH2), [])
 
     def test_run(self):
         bs.run()

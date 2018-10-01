@@ -95,10 +95,6 @@ class Board:
     [1 : rows-1][1 : columns-1].
 
     Class instance attributes:
-        size (int): Total number of playfield rows and columns. The program
-            currently supports square playfields only. Since the playfield
-            contains two additional row and two additional columns, the number
-            is greater than the actual playfield size by 2.
         playfield (Playfield): 2D list of variables of type FieldType.
         rem_pcs_in_rows (List[int]): List of number of ship pieces remaining
             to fill each playfield row.
@@ -112,7 +108,6 @@ class Board:
 
     def __init__(
         self,
-        size: int,
         playfield: PlayField,
         rem_pcs_in_rows: List[int],
         rem_pcs_in_cols: List[int],
@@ -122,7 +117,6 @@ class Board:
         """Initializes a new Board object.
 
         Args:
-            size (int): Total number of playfield rows and columns.
             playfield (Playfield): 2D list of variables of type FieldType.
             rem_pcs_in_rows (List[int]): List of number of ship pieces
                 remaining to fill each playfield row.
@@ -135,7 +129,6 @@ class Board:
                 ship pieces in each playfield column. Defaults to None, in
                 which case a copy of the rem_pcs_in_columns list is used.
         """
-        self.size = size
         self.playfield = [[*row] for row in playfield]
         self.rem_pcs_in_rows = [*rem_pcs_in_rows]
         self.rem_pcs_in_cols = [*rem_pcs_in_cols]
@@ -147,6 +140,11 @@ class Board:
             self.total_pcs_in_cols = [*total_pcs_in_cols]
         else:
             self.total_pcs_in_cols = [*self.rem_pcs_in_cols]
+
+    @property
+    def size(self):
+        """Total number of this board playfield rows and columns."""
+        return len(self.playfield)
 
     def repr(self, total_pcs_only: bool=False) -> str:
         """A convenient string representation of this object data.
@@ -207,7 +205,6 @@ class Board:
         if isinstance(other, self.__class__):
             other = cast(Board, other)
             return (
-                other.size == self.size and
                 other.playfield == self.playfield and
                 other.rem_pcs_in_rows == self.rem_pcs_in_rows and
                 other.rem_pcs_in_cols == self.rem_pcs_in_cols and
@@ -223,7 +220,6 @@ class Board:
             Board: A copy of this object.
         """
         return self.__class__(
-            self.size,
             self.playfield,
             self.rem_pcs_in_rows,
             self.rem_pcs_in_cols,
@@ -304,7 +300,6 @@ def parse_game_data_file(input_file_path: str) -> GameData:
 
 
 def get_board(
-    board_size: int,
     playfield: PlayField,
     solution_pcs_in_rows: List[int],
     solution_pcs_in_cols: List[int]
@@ -313,8 +308,6 @@ def get_board(
     contains only sea fields.
 
     Args:
-        board_size (int): Number of rows and columns of the board playfield
-            area which may contain ship pieces.
         playfield (PlayField): Board playfield area which may contain ship
             pieces.
         solution_pcs_in_rows (List[int]): List of ship pieces in each playfield
@@ -325,14 +318,13 @@ def get_board(
     Returns:
         Board: Board containing only sea fields.
     """
-    new_playfield = [[FieldType.SEA] * (board_size + 2)]
+    new_playfield = [[FieldType.SEA] * (len(playfield) + 2)]
     for row in playfield:
         new_playfield.append([FieldType.SEA, *row, FieldType.SEA])
-    new_playfield.append([FieldType.SEA] * (board_size + 2))
+    new_playfield.append([FieldType.SEA] * (len(playfield) + 2))
     new_rem_pcs_in_rows = [0, *solution_pcs_in_rows, 0]
     new_rem_pcs_in_cols = [0, *solution_pcs_in_cols, 0]
     return Board(
-        (board_size + 2),
         new_playfield,
         new_rem_pcs_in_rows,
         new_rem_pcs_in_cols
@@ -843,7 +835,6 @@ def get_solutions(config_file_path: str=None) -> List[Board]:
     FieldType = get_redefined_fieldtypes(config)  # type: ignore
     game_data = parse_game_data_file(config["GAMEDATA"]["FILEPATH"])
     board = get_board(
-        game_data.board_size,
         game_data.playfield,
         game_data.solution_pcs_in_rows,
         game_data.solution_pcs_in_cols
