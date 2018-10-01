@@ -1,9 +1,6 @@
 """Battleships puzzle solver.
 
 Before running this module please read the README file.
-
-Example:
-    $ python3 battleships.py
 """
 
 from configparser import ConfigParser
@@ -71,7 +68,6 @@ class Fleet(
 GameData = NamedTuple(
     "GameData",
     [
-        ("board_size", int),
         ("playfield", PlayField),
         ("solution_pcs_in_rows", List[int]),
         ("solution_pcs_in_cols", List[int]),
@@ -291,7 +287,6 @@ def parse_game_data_file(input_file_path: str) -> GameData:
         for _ in range(board_size):
             playfield.append([FieldType(ch) for ch in next(file).strip()])
         return GameData(
-            board_size,
             playfield,
             solution_pcs_in_rows,
             solution_pcs_in_cols,

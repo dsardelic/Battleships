@@ -26,8 +26,12 @@ class BattleshipsTest(unittest.TestCase):
         config = bs.parse_config(SAMPLE_CONFIG_FILE_PATH)
         bs.FieldType = bs.get_redefined_fieldtypes(config)
         game_data = bs.parse_game_data_file(config["GAMEDATA"]["FILEPATH"])
-        g_exp_board = bs.get_board(*game_data[1:4])
-        g_exp_fleet = game_data[4]
+        g_exp_board = bs.get_board(
+            game_data.playfield,
+            game_data.solution_pcs_in_rows,
+            game_data.solution_pcs_in_cols
+        )
+        g_exp_fleet = game_data.fleet
         unittest.TestCase.setUp(self)
 
     def parse_board(self, board_repr):
@@ -199,7 +203,6 @@ class BattleshipsTest(unittest.TestCase):
         exp_playfield[7][7] = bs.FieldType.SEA
         exp_playfield[9][4] = bs.FieldType.SHIP
         game_data = bs.parse_game_data_file(config["GAMEDATA"]["FILEPATH"])
-        self.assertEqual(game_data.board_size, 10)
         self.assertEqual(game_data.playfield, exp_playfield)
         self.assertEqual(
             game_data.solution_pcs_in_rows, [0, 1, 3, 3, 1, 1, 2, 2, 0, 7]
