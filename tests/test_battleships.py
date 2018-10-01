@@ -11,9 +11,6 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SAMPLE_CONFIG_FILE_PATH = os.path.join(
     BASE_DIR, 'tests/sample_configs/Battleships1.ini'
 )
-SAMPLE_CONFIG_FILE_PATH2 = os.path.join(
-    BASE_DIR, 'tests/sample_configs/Battleships2.ini'
-)
 
 
 class BattleshipsTest(unittest.TestCase):
@@ -26,7 +23,7 @@ class BattleshipsTest(unittest.TestCase):
         config = bs.parse_config(SAMPLE_CONFIG_FILE_PATH)
         bs.FieldType = bs.get_redefined_fieldtypes(config)
         game_data = bs.parse_game_data_file(config["GAMEDATA"]["FILEPATH"])
-        g_exp_board = bs.get_board(
+        g_exp_board = bs.Board.get_board_from_game_data(
             game_data.playfield,
             game_data.solution_pcs_in_rows,
             game_data.solution_pcs_in_cols
@@ -69,7 +66,9 @@ class BattleshipsTest(unittest.TestCase):
                     total_pcs_in_cols[i] - pcs_in_cols[i]
                     for i in range(len(total_pcs_in_cols))
                 ]
-        board = bs.get_board(playfield, rem_pcs_in_rows, rem_pcs_in_cols)
+        board = bs.Board.get_board_from_game_data(
+            playfield, rem_pcs_in_rows, rem_pcs_in_cols
+        )
         board.total_pcs_in_rows = [0, *total_pcs_in_rows, 0]
         board.total_pcs_in_cols = [0, *total_pcs_in_cols, 0]
         return board
@@ -239,7 +238,9 @@ class BattleshipsTest(unittest.TestCase):
         exp_rem_pcs_in_cols = [0, 1, 1, 4, 1, 6, 1, 0, 2, 2, 2, 0]
 
         self.assertEqual(
-            bs.get_board(playfield, rem_pcs_in_rows, rem_pcs_in_cols),
+            bs.Board.get_board_from_game_data(
+                playfield, rem_pcs_in_rows, rem_pcs_in_cols
+            ),
             bs.Board(exp_playfield, exp_rem_pcs_in_rows, exp_rem_pcs_in_cols)
         )
 
@@ -1008,7 +1009,7 @@ class BattleshipsTest(unittest.TestCase):
 
     def test_parse_test_config(self):
         self.assertEqual(
-            "/media/winshare/git/Battleships/tests/sample_boards/board01.txt",
+            os.path.join(BASE_DIR, "tests/sample_boards/board01.txt"),
             config["GAMEDATA"]["FILEPATH"]
         )
         self.assertEqual("O", config["FIELDTYPESYMBOLS"]["SHIP"])
@@ -1018,7 +1019,7 @@ class BattleshipsTest(unittest.TestCase):
     def test_parse_default_config(self):
         default_config = bs.parse_config()
         self.assertEqual(
-            "/media/winshare/git/Battleships/tests/sample_boards/board01.txt",
+            os.path.join(BASE_DIR, "tests/sample_boards/board01.txt"),
             default_config["GAMEDATA"]["FILEPATH"]
         )
         self.assertEqual("O", default_config["FIELDTYPESYMBOLS"]["SHIP"])
@@ -1084,7 +1085,15 @@ class BattleshipsTest(unittest.TestCase):
         )
 
     def test_get_solutions_when_no_solutions(self):
-        self.assertEqual(bs.get_solutions(SAMPLE_CONFIG_FILE_PATH2), [])
+        self.assertEqual(
+            bs.get_solutions(
+                os.path.join(
+                    os.path.dirname(SAMPLE_CONFIG_FILE_PATH),
+                    'Battleships2.ini'
+                )
+            ),
+            []
+        )
 
     def test_run(self):
         bs.run()

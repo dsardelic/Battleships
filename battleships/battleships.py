@@ -7,11 +7,11 @@ from configparser import ConfigParser
 from enum import Enum
 import os
 from typing import List, Dict, Tuple, Optional, Union, Set, NamedTuple, Any, \
-    cast
+    cast, TypeVar, Type
 
 
 Position = Tuple[int, int]
-"""Specific field coordinates"""
+"""Field coordinates"""
 
 
 class FieldType(Enum):
@@ -77,6 +77,10 @@ GameData = NamedTuple(
 """Data structure containing data parsed from the input data file."""
 
 
+T = TypeVar('T', bound='Board')
+"""Type variable with an upper bound"""
+
+
 class Board:
     """Class representing board data.
 
@@ -110,21 +114,6 @@ class Board:
         total_pcs_in_rows: Optional[List[int]]=None,
         total_pcs_in_cols: Optional[List[int]]=None
     ) -> None:
-        """Initializes a new Board object.
-
-        Args:
-            playfield (Playfield): 2D list of variables of type FieldType.
-            rem_pcs_in_rows (List[int]): List of number of ship pieces
-                remaining to fill each playfield row.
-            rem_pcs_in_cols (List[int]): List of number of ship pieces
-                remaining to fill each playfield column.
-            total_pcs_in_rows (List[int]): List of total required number of
-                ship pieces in each playfield row. Defaults to None, in which
-                case a copy of the rem_pcs_in_rows list is used.
-            total_pcs_in_cols (List[int]): List of total required number of
-                ship pieces in each playfield column. Defaults to None, in
-                which case a copy of the rem_pcs_in_columns list is used.
-        """
         self.playfield = [[*row] for row in playfield]
         self.rem_pcs_in_rows = [*rem_pcs_in_rows]
         self.rem_pcs_in_cols = [*rem_pcs_in_cols]
@@ -141,6 +130,35 @@ class Board:
     def size(self):
         """Total number of this board playfield rows and columns."""
         return len(self.playfield)
+
+    @classmethod
+    def get_board_from_game_data(
+        cls: Type[T],
+        playfield: PlayField,
+        solution_pcs_in_rows: List[int],
+        solution_pcs_in_cols: List[int]
+    ) -> 'Board':
+        """Returns a new board object initialized with actual game data. The new
+        board contains sea fields only.
+
+        Args:
+            playfield (PlayField): Board playfield area which may contain ship
+                pieces.
+            solution_pcs_in_rows (List[int]): List of ship pieces in each
+                playfield row.
+            solution_pcs_in_cols (List[int]): List of ship pieces in each
+                playfield column.
+
+        Returns:
+            Board: Board containing only sea fields.
+        """
+        new_playfield = [[FieldType.SEA] * (len(playfield) + 2)]
+        for row in playfield:
+            new_playfield.append([FieldType.SEA, *row, FieldType.SEA])
+        new_playfield.append([FieldType.SEA] * (len(playfield) + 2))
+        new_rem_pcs_in_rows = [0, *solution_pcs_in_rows, 0]
+        new_rem_pcs_in_cols = [0, *solution_pcs_in_cols, 0]
+        return cls(new_playfield, new_rem_pcs_in_rows, new_rem_pcs_in_cols)
 
     def repr(self, total_pcs_only: bool=False) -> str:
         """A convenient string representation of this object data.
@@ -292,38 +310,6 @@ def parse_game_data_file(input_file_path: str) -> GameData:
             solution_pcs_in_cols,
             fleet
         )
-
-
-def get_board(
-    playfield: PlayField,
-    solution_pcs_in_rows: List[int],
-    solution_pcs_in_cols: List[int]
-) -> Board:
-    """Returns a new board object initialized with given inputs. The new board
-    contains only sea fields.
-
-    Args:
-        playfield (PlayField): Board playfield area which may contain ship
-            pieces.
-        solution_pcs_in_rows (List[int]): List of ship pieces in each playfield
-            row.
-        solution_pcs_in_cols (List[int]): List of ship pieces in each playfield
-            column.
-
-    Returns:
-        Board: Board containing only sea fields.
-    """
-    new_playfield = [[FieldType.SEA] * (len(playfield) + 2)]
-    for row in playfield:
-        new_playfield.append([FieldType.SEA, *row, FieldType.SEA])
-    new_playfield.append([FieldType.SEA] * (len(playfield) + 2))
-    new_rem_pcs_in_rows = [0, *solution_pcs_in_rows, 0]
-    new_rem_pcs_in_cols = [0, *solution_pcs_in_cols, 0]
-    return Board(
-        new_playfield,
-        new_rem_pcs_in_rows,
-        new_rem_pcs_in_cols
-    )
 
 
 def get_ship_pcs_positions(board: Board) -> List[Position]:
@@ -829,7 +815,7 @@ def get_solutions(config_file_path: str=None) -> List[Board]:
     global FieldType
     FieldType = get_redefined_fieldtypes(config)  # type: ignore
     game_data = parse_game_data_file(config["GAMEDATA"]["FILEPATH"])
-    board = get_board(
+    board = Board.get_board_from_game_data(
         game_data.playfield,
         game_data.solution_pcs_in_rows,
         game_data.solution_pcs_in_cols
