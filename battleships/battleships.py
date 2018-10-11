@@ -305,10 +305,7 @@ def parse_game_data_file(input_file_path: str) -> GameData:
         for _ in range(board_size):
             playfield.append([FieldType(ch) for ch in next(file).strip()])
         return GameData(
-            playfield,
-            solution_pcs_in_rows,
-            solution_pcs_in_cols,
-            fleet
+            playfield, solution_pcs_in_rows, solution_pcs_in_cols, fleet
         )
 
 
@@ -543,7 +540,7 @@ def get_field_ships(
             ship = Ship(row, i, ship_length, Direction.RIGHT)
             if can_fit_ship_on_board(board, ship):
                 ships.append(ship)
-    if ship_length <= board.rem_pcs_in_cols[col] and ship_length > 1:
+    if 1 < ship_length <= board.rem_pcs_in_cols[col]:
         min_x = max(row - (ship_length - 1), 0)
         max_x = min(row, board.size - 1 - ship_length)
         for i in range(min_x, max_x + 1):
@@ -644,9 +641,7 @@ def mark_uncovered_ships(
             ship = fields_ships_mappings[(row, col)][0]
             mark_ships(board, fleet, [ship])
             remove_ship_from_mappings(
-                ship_pcs_positions,
-                fields_ships_mappings,
-                ship
+                ship_pcs_positions, fields_ships_mappings, ship
             )
 
 
@@ -674,9 +669,8 @@ def get_ships_of_length(board: Board, ship_length: int) -> List[Ship]:
                     if can_fit_ship_on_board(board, ship):
                         ships.append(ship)
                 if (
-                    ship_length <= board.rem_pcs_in_cols[col] and
-                    row + ship_length < board.size and
-                    ship_length > 1
+                    1 < ship_length <= board.rem_pcs_in_cols[col] and
+                    row + ship_length < board.size
                 ):
                     ship = Ship(row, col, ship_length, Direction.DOWN)
                     if can_fit_ship_on_board(board, ship):
