@@ -111,8 +111,8 @@ class Board:
         playfield: PlayField,
         rem_pcs_in_rows: List[int],
         rem_pcs_in_cols: List[int],
-        total_pcs_in_rows: Optional[List[int]]=None,
-        total_pcs_in_cols: Optional[List[int]]=None
+        total_pcs_in_rows: Optional[List[int]] = None,
+        total_pcs_in_cols: Optional[List[int]] = None
     ) -> None:
         self.playfield = [[*row] for row in playfield]
         self.rem_pcs_in_rows = [*rem_pcs_in_rows]
@@ -138,8 +138,8 @@ class Board:
         solution_pcs_in_rows: List[int],
         solution_pcs_in_cols: List[int]
     ) -> 'Board':
-        """Returns a new board object initialized with actual game data. The new
-        board contains sea fields only.
+        """Returns a new board object initialized with actual game data. The
+        new board contains sea fields only.
 
         Args:
             playfield (PlayField): Board playfield area which may contain ship
@@ -160,7 +160,7 @@ class Board:
         new_rem_pcs_in_cols = [0, *solution_pcs_in_cols, 0]
         return cls(new_playfield, new_rem_pcs_in_rows, new_rem_pcs_in_cols)
 
-    def repr(self, total_pcs_only: bool=False) -> str:
+    def repr(self, total_pcs_only: Optional[bool] = False) -> str:
         """A convenient string representation of this object data.
 
         Args:
@@ -242,7 +242,7 @@ class Board:
         )
 
 
-def parse_config(config_file_path: str=None) -> ConfigParser:
+def parse_config(config_file_path: Optional[str] = None) -> ConfigParser:
     """Parses the input config file and returns a config object.
 
     Args:
@@ -793,7 +793,7 @@ def get_solutions_for_mappings(
     return solutions
 
 
-def get_solutions(config_file_path: str=None) -> List[Board]:
+def get_solutions(config_file_path: Optional[str] = None) -> List[Board]:
     """Returns a list of solutions for input parameters from the file at path
     game_data_file_path.
 
