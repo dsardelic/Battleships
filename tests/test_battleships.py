@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 import random
 import re
 import unittest
@@ -1082,8 +1083,8 @@ class BattleshipsTest(unittest.TestCase):
 
     def test_parse_test_config(self):
         self.assertEqual(
-            os.path.join(self.base_dir, "tests/sample_boards/board01.txt"),
-            self.sample_config["GAMEDATA"]["FILEPATH"]
+            Path(self.base_dir).joinpath("tests/sample_boards/board01.txt"),
+            Path(self.sample_config["GAMEDATA"]["FILEPATH"])
         )
         self.assertEqual("O", self.sample_config["FIELDTYPESYMBOLS"]["SHIP"])
         self.assertEqual(".", self.sample_config["FIELDTYPESYMBOLS"]["SEA"])
@@ -1094,8 +1095,8 @@ class BattleshipsTest(unittest.TestCase):
     def test_parse_default_config(self):
         default_config = bs.parse_config()
         self.assertEqual(
-            os.path.join(self.base_dir, "tests/sample_boards/board01.txt"),
-            default_config["GAMEDATA"]["FILEPATH"]
+            Path(self.base_dir).joinpath("tests/sample_boards/board01.txt"),
+            Path(self.sample_config["GAMEDATA"]["FILEPATH"])
         )
         self.assertEqual("O", default_config["FIELDTYPESYMBOLS"]["SHIP"])
         self.assertEqual(".", default_config["FIELDTYPESYMBOLS"]["SEA"])
