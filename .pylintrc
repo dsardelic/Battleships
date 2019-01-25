@@ -1,0 +1,9 @@
+[MASTER]
+ignore=tests
+ignore-patterns=^test_\w+\.py$
+
+[MESSAGES CONTROL]
+disable=C0330,C0303
+
+[FORMAT]
+max-line-length=88

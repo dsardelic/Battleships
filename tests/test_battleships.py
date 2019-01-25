@@ -8,14 +8,11 @@ from battleships import battleships as bs
 
 
 class BattleshipsTest(unittest.TestCase):
-
     def setUp(self):
         random.seed()
-        self.base_dir = os.path.dirname(
-            os.path.dirname(os.path.abspath(__file__))
-        )
+        self.base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
         self.sample_config_file_path = os.path.join(
-            self.base_dir, 'tests/sample_configs/Battleships1.ini'
+            self.base_dir, "tests/sample_configs/Battleships1.ini"
         )
         self.sample_config = bs.parse_config(self.sample_config_file_path)
         bs.FieldType = bs.get_redefined_fieldtypes(self.sample_config)
@@ -25,41 +22,35 @@ class BattleshipsTest(unittest.TestCase):
         self.sample_exp_board = bs.Board.get_board_from_game_data(
             sample_game_data.playfield,
             sample_game_data.solution_pcs_in_rows,
-            sample_game_data.solution_pcs_in_cols
+            sample_game_data.solution_pcs_in_cols,
         )
         self.sample_exp_fleet = sample_game_data.fleet
 
     @staticmethod
     def parse_board(board_repr):
-        playfield, rem_pcs_in_rows, rem_pcs_in_cols, total_pcs_in_rows, \
-            total_pcs_in_cols = [], [], [], [], []
-        lines = board_repr.split('\n')
+        playfield = []
+        rem_pcs_in_rows = []
+        rem_pcs_in_cols = []
+        total_pcs_in_rows = []
+        total_pcs_in_cols = []
+        lines = board_repr.split("\n")
         lines_count = len(lines) - 1
         for row in range(1, lines_count):
             line = lines[row].strip()
             if row < lines_count - 3:
                 playfield.append(
-                    [
-                        bs.FieldType(token)
-                        for token in list(re.sub('[^.xO]', '', line))
-                    ]
+                    [bs.FieldType(token) for token in list(re.sub("[^.xO]", "", line))]
                 )
                 pcs_in_row, total_pcs_in_row = map(
-                    int,
-                    re.findall(r'\((\d+)\)', line[line.index('║') + 1:])
+                    int, re.findall(r"\((\d+)\)", line[line.index("║") + 1 :])
                 )
                 rem_pcs_in_rows.append(total_pcs_in_row - pcs_in_row)
                 total_pcs_in_rows.append(total_pcs_in_row)
             elif row == lines_count - 2:
-                pcs_in_cols = list(
-                    map(int, re.findall(r'\((\d+)\)', line.strip()))
-                )
+                pcs_in_cols = list(map(int, re.findall(r"\((\d+)\)", line.strip())))
             elif row == lines_count - 1:
                 total_pcs_in_cols = list(
-                    map(
-                        int,
-                        re.findall(r'\((\d+)\)', line.strip())
-                    )
+                    map(int, re.findall(r"\((\d+)\)", line.strip()))
                 )
                 rem_pcs_in_cols = [
                     total_pcs_in_cols[i] - pcs_in_cols[i]
@@ -74,8 +65,7 @@ class BattleshipsTest(unittest.TestCase):
 
     def test_parse_board(self):
         self.assertEqual(
-            self.sample_exp_board,
-            self.parse_board(self.sample_exp_board.__repr__())
+            self.sample_exp_board, self.parse_board(self.sample_exp_board.__repr__())
         )
 
     def test_board_init(self):
@@ -106,7 +96,7 @@ class BattleshipsTest(unittest.TestCase):
             rem_pcs_in_rows,
             rem_pcs_in_cols,
             total_pcs_in_rows,
-            total_pcs_in_cols
+            total_pcs_in_cols,
         )
         self.assertEqual(board.total_pcs_in_rows, total_pcs_in_rows)
         self.assertEqual(board.total_pcs_in_cols, total_pcs_in_cols)
@@ -115,37 +105,37 @@ class BattleshipsTest(unittest.TestCase):
 
     def test_board_repr(self):
         exp_repr = (
-            '═════════════════════════════════════════\n'
-            ' x   x   x   x   x   x   x   x   x   x   ║(0)\n'
-            ' x   x   x   x   x   x   x   x   x   x   ║(1)\n'
-            ' x   x   x   x   x   x   x   x   x   x   ║(3)\n'
-            ' x   x   x   x   x   x   x   x   x   x   ║(3)\n'
-            ' x   x   O   x   x   x   x   x   x   x   ║(1)\n'
-            ' x   x   x   x   x   x   x   x   x   x   ║(1)\n'
-            ' x   x   x   x   x   x   x   x   x   x   ║(2)\n'
-            ' x   x   .   x   .   x   x   .   x   x   ║(2)\n'
-            ' x   x   x   x   x   x   x   x   x   x   ║(0)\n'
-            ' x   x   x   x   O   x   x   x   x   x   ║(7)\n'
-            '═════════════════════════════════════════\n'
-            '(1) (1) (4) (1) (6) (1) (0) (2) (2) (2) \n'
+            "═════════════════════════════════════════\n"
+            " x   x   x   x   x   x   x   x   x   x   ║(0)\n"
+            " x   x   x   x   x   x   x   x   x   x   ║(1)\n"
+            " x   x   x   x   x   x   x   x   x   x   ║(3)\n"
+            " x   x   x   x   x   x   x   x   x   x   ║(3)\n"
+            " x   x   O   x   x   x   x   x   x   x   ║(1)\n"
+            " x   x   x   x   x   x   x   x   x   x   ║(1)\n"
+            " x   x   x   x   x   x   x   x   x   x   ║(2)\n"
+            " x   x   .   x   .   x   x   .   x   x   ║(2)\n"
+            " x   x   x   x   x   x   x   x   x   x   ║(0)\n"
+            " x   x   x   x   O   x   x   x   x   x   ║(7)\n"
+            "═════════════════════════════════════════\n"
+            "(1) (1) (4) (1) (6) (1) (0) (2) (2) (2) \n"
         )
         self.assertEqual(self.sample_exp_board.repr(True), exp_repr)
 
         exp_repr = (
-            '═════════════════════════════════════════\n'
-            ' x   x   x   x   x   x   x   x   x   x   ║(0)(0)\n'
-            ' x   x   x   x   x   x   x   x   x   x   ║(0)(1)\n'
-            ' x   x   x   x   x   x   x   x   x   x   ║(0)(3)\n'
-            ' x   x   x   x   x   x   x   x   x   x   ║(0)(3)\n'
-            ' x   x   O   x   x   x   x   x   x   x   ║(0)(1)\n'
-            ' x   x   x   x   x   x   x   x   x   x   ║(0)(1)\n'
-            ' x   x   x   x   x   x   x   x   x   x   ║(0)(2)\n'
-            ' x   x   .   x   .   x   x   .   x   x   ║(0)(2)\n'
-            ' x   x   x   x   x   x   x   x   x   x   ║(0)(0)\n'
-            ' x   x   x   x   O   x   x   x   x   x   ║(0)(7)\n'
-            '═════════════════════════════════════════\n'
-            '(0) (0) (0) (0) (0) (0) (0) (0) (0) (0) \n'
-            '(1) (1) (4) (1) (6) (1) (0) (2) (2) (2) \n'
+            "═════════════════════════════════════════\n"
+            " x   x   x   x   x   x   x   x   x   x   ║(0)(0)\n"
+            " x   x   x   x   x   x   x   x   x   x   ║(0)(1)\n"
+            " x   x   x   x   x   x   x   x   x   x   ║(0)(3)\n"
+            " x   x   x   x   x   x   x   x   x   x   ║(0)(3)\n"
+            " x   x   O   x   x   x   x   x   x   x   ║(0)(1)\n"
+            " x   x   x   x   x   x   x   x   x   x   ║(0)(1)\n"
+            " x   x   x   x   x   x   x   x   x   x   ║(0)(2)\n"
+            " x   x   .   x   .   x   x   .   x   x   ║(0)(2)\n"
+            " x   x   x   x   x   x   x   x   x   x   ║(0)(0)\n"
+            " x   x   x   x   O   x   x   x   x   x   ║(0)(7)\n"
+            "═════════════════════════════════════════\n"
+            "(0) (0) (0) (0) (0) (0) (0) (0) (0) (0) \n"
+            "(1) (1) (4) (1) (6) (1) (0) (2) (2) (2) \n"
         )
         self.assertEqual(self.sample_exp_board.__repr__(), exp_repr)
 
@@ -164,7 +154,7 @@ class BattleshipsTest(unittest.TestCase):
         board = bs.Board(
             playfield,
             [0, 0, 1, 3, 3, 1, 1, 2, 2, 0, 7, 0],
-            [0, 1, 1, 4, 1, 6, 1, 0, 2, 2, 2, 0]
+            [0, 1, 1, 4, 1, 6, 1, 0, 2, 2, 2, 0],
         )
         self.assertEqual(self.sample_exp_board.__eq__(board), True)
         self.assertEqual(self.sample_exp_board is board, False)
@@ -192,9 +182,9 @@ class BattleshipsTest(unittest.TestCase):
 
     def test_get_redefined_fieldtypes(self):
         FieldType = bs.get_redefined_fieldtypes(self.sample_config)
-        self.assertEqual(FieldType.SEA.value, '.')
-        self.assertEqual(FieldType.SHIP.value, 'O')
-        self.assertEqual(FieldType.UNKNOWN.value, 'x')
+        self.assertEqual(FieldType.SEA.value, ".")
+        self.assertEqual(FieldType.SHIP.value, "O")
+        self.assertEqual(FieldType.UNKNOWN.value, "x")
 
     def test_parse_game_data_file(self):
         exp_playfield = [[bs.FieldType.UNKNOWN] * 10 for _ in range(10)]
@@ -203,16 +193,10 @@ class BattleshipsTest(unittest.TestCase):
         exp_playfield[7][4] = bs.FieldType.SEA
         exp_playfield[7][7] = bs.FieldType.SEA
         exp_playfield[9][4] = bs.FieldType.SHIP
-        game_data = bs.parse_game_data_file(
-            self.sample_config["GAMEDATA"]["FILEPATH"]
-        )
+        game_data = bs.parse_game_data_file(self.sample_config["GAMEDATA"]["FILEPATH"])
         self.assertEqual(game_data.playfield, exp_playfield)
-        self.assertEqual(
-            game_data.solution_pcs_in_rows, [0, 1, 3, 3, 1, 1, 2, 2, 0, 7]
-        )
-        self.assertEqual(
-            game_data.solution_pcs_in_cols, [1, 1, 4, 1, 6, 1, 0, 2, 2, 2]
-        )
+        self.assertEqual(game_data.solution_pcs_in_rows, [0, 1, 3, 3, 1, 1, 2, 2, 0, 7])
+        self.assertEqual(game_data.solution_pcs_in_cols, [1, 1, 4, 1, 6, 1, 0, 2, 2, 2])
         self.assertEqual(
             game_data.fleet, bs.Fleet([4, 3, 2, 1], {4: 1, 3: 2, 2: 3, 1: 4})
         )
@@ -245,45 +229,37 @@ class BattleshipsTest(unittest.TestCase):
             bs.Board.get_board_from_game_data(
                 playfield, rem_pcs_in_rows, rem_pcs_in_cols
             ),
-            bs.Board(exp_playfield, exp_rem_pcs_in_rows, exp_rem_pcs_in_cols)
+            bs.Board(exp_playfield, exp_rem_pcs_in_rows, exp_rem_pcs_in_cols),
         )
 
     def test_get_ship_pcs_positions(self):
         act_board = self.sample_exp_board.get_copy()
-        self.assertEqual(
-            bs.get_ship_pcs_positions(act_board), [(5, 3), (10, 5)]
-        )
+        self.assertEqual(bs.get_ship_pcs_positions(act_board), [(5, 3), (10, 5)])
         self.assertEqual(act_board, self.sample_exp_board)
 
     def test_mark_uncovered_sea_positions(self):
         act_board = self.sample_exp_board.get_copy()
-        act_ship_pcs_positions = bs.get_ship_pcs_positions(
-            self.sample_exp_board
-        )
+        act_ship_pcs_positions = bs.get_ship_pcs_positions(self.sample_exp_board)
         exp_ship_pcs_positions = [*act_ship_pcs_positions]
-        bs.mark_uncovered_sea_positions(
-            act_board, act_ship_pcs_positions
-        )
+        bs.mark_uncovered_sea_positions(act_board, act_ship_pcs_positions)
         exp_board_repr = (
-            '═════════════════════════════════════════\n'
-            ' .   .   .   .   .   .   .   .   .   .   ║(0)(0)\n'
-            ' x   x   x   x   x   x   .   x   x   x   ║(0)(1)\n'
-            ' x   x   x   x   x   x   .   x   x   x   ║(0)(3)\n'
-            ' x   .   x   .   x   x   .   x   x   x   ║(0)(3)\n'
-            ' .   .   O   .   .   .   .   .   .   .   ║(0)(1)\n'
-            ' x   .   x   .   x   x   .   x   x   x   ║(0)(1)\n'
-            ' x   x   x   x   x   x   .   x   x   x   ║(0)(2)\n'
-            ' x   x   .   x   .   x   .   .   x   x   ║(0)(2)\n'
-            ' .   .   .   .   .   .   .   .   .   .   ║(0)(0)\n'
-            ' x   x   x   x   O   x   .   x   x   x   ║(0)(7)\n'
-            '═════════════════════════════════════════\n'
-            '(0) (0) (0) (0) (0) (0) (0) (0) (0) (0) \n'
-            '(1) (1) (4) (1) (6) (1) (0) (2) (2) (2) \n'
+            "═════════════════════════════════════════\n"
+            " .   .   .   .   .   .   .   .   .   .   ║(0)(0)\n"
+            " x   x   x   x   x   x   .   x   x   x   ║(0)(1)\n"
+            " x   x   x   x   x   x   .   x   x   x   ║(0)(3)\n"
+            " x   .   x   .   x   x   .   x   x   x   ║(0)(3)\n"
+            " .   .   O   .   .   .   .   .   .   .   ║(0)(1)\n"
+            " x   .   x   .   x   x   .   x   x   x   ║(0)(1)\n"
+            " x   x   x   x   x   x   .   x   x   x   ║(0)(2)\n"
+            " x   x   .   x   .   x   .   .   x   x   ║(0)(2)\n"
+            " .   .   .   .   .   .   .   .   .   .   ║(0)(0)\n"
+            " x   x   x   x   O   x   .   x   x   x   ║(0)(7)\n"
+            "═════════════════════════════════════════\n"
+            "(0) (0) (0) (0) (0) (0) (0) (0) (0) (0) \n"
+            "(1) (1) (4) (1) (6) (1) (0) (2) (2) (2) \n"
         )
         self.assertEqual(act_board, self.parse_board(exp_board_repr))
-        self.assertEqual(
-            act_ship_pcs_positions, exp_ship_pcs_positions
-        )
+        self.assertEqual(act_ship_pcs_positions, exp_ship_pcs_positions)
 
     def test_ship_cannot_exceed_rem_pcs_in_rows(self):
         act_board = self.sample_exp_board.get_copy()
@@ -294,9 +270,7 @@ class BattleshipsTest(unittest.TestCase):
         )
         for ship, exp_value in test_data:
             with self.subTest(ship):
-                self.assertEqual(
-                    bs.can_fit_ship_on_board(act_board, ship), exp_value
-                )
+                self.assertEqual(bs.can_fit_ship_on_board(act_board, ship), exp_value)
                 self.assertEqual(act_board, self.sample_exp_board)
 
     def test_ship_cannot_exceed_rem_pcs_in_cols(self):
@@ -309,9 +283,7 @@ class BattleshipsTest(unittest.TestCase):
         )
         for ship, exp_value in test_data:
             with self.subTest(ship):
-                self.assertEqual(
-                    bs.can_fit_ship_on_board(act_board, ship), exp_value
-                )
+                self.assertEqual(bs.can_fit_ship_on_board(act_board, ship), exp_value)
                 self.assertEqual(act_board, self.sample_exp_board)
 
     def test_ship_cannot_overflow_row(self):
@@ -323,9 +295,7 @@ class BattleshipsTest(unittest.TestCase):
         )
         for ship, exp_value in test_data:
             with self.subTest(ship):
-                self.assertEqual(
-                    bs.can_fit_ship_on_board(act_board, ship), exp_value
-                )
+                self.assertEqual(bs.can_fit_ship_on_board(act_board, ship), exp_value)
                 self.assertEqual(act_board, self.sample_exp_board)
 
     def test_ship_cannot_overflow_column(self):
@@ -338,9 +308,7 @@ class BattleshipsTest(unittest.TestCase):
         )
         for ship, exp_value in test_data:
             with self.subTest(ship):
-                self.assertEqual(
-                    bs.can_fit_ship_on_board(act_board, ship), exp_value
-                )
+                self.assertEqual(bs.can_fit_ship_on_board(act_board, ship), exp_value)
                 self.assertEqual(act_board, self.sample_exp_board)
 
     def test_all_ship_pcs_in_rows_must_initially_be_unknown(self):
@@ -352,9 +320,7 @@ class BattleshipsTest(unittest.TestCase):
         )
         for ship, exp_value in test_data:
             with self.subTest(ship):
-                self.assertEqual(
-                    bs.can_fit_ship_on_board(act_board, ship), exp_value
-                )
+                self.assertEqual(bs.can_fit_ship_on_board(act_board, ship), exp_value)
                 self.assertEqual(act_board, self.sample_exp_board)
 
     def test_all_ship_pcs_in_columns_must_initially_be_unknown(self):
@@ -365,9 +331,7 @@ class BattleshipsTest(unittest.TestCase):
         )
         for ship, exp_value in test_data:
             with self.subTest(ship):
-                self.assertEqual(
-                    bs.can_fit_ship_on_board(act_board, ship), exp_value
-                )
+                self.assertEqual(bs.can_fit_ship_on_board(act_board, ship), exp_value)
                 self.assertEqual(act_board, self.sample_exp_board)
 
     def test_ship_must_not_touch_another_ship(self):
@@ -385,9 +349,7 @@ class BattleshipsTest(unittest.TestCase):
         )
         for ship, exp_value in test_data:
             with self.subTest(ship):
-                self.assertEqual(
-                    bs.can_fit_ship_on_board(act_board, ship), exp_value
-                )
+                self.assertEqual(bs.can_fit_ship_on_board(act_board, ship), exp_value)
                 self.assertEqual(act_board, self.sample_exp_board)
 
         self.sample_exp_board.playfield[5][3] = bs.FieldType.UNKNOWN
@@ -406,9 +368,7 @@ class BattleshipsTest(unittest.TestCase):
         )
         for ship, exp_value in test_data:
             with self.subTest(ship):
-                self.assertEqual(
-                    bs.can_fit_ship_on_board(act_board, ship), exp_value
-                )
+                self.assertEqual(bs.can_fit_ship_on_board(act_board, ship), exp_value)
                 self.assertEqual(act_board, self.sample_exp_board)
 
     def test_reduce_rem_pcs_and_mark_sea_in_filled_rows(self):
@@ -416,9 +376,7 @@ class BattleshipsTest(unittest.TestCase):
         self.sample_exp_board.playfield[10][5] = bs.FieldType.UNKNOWN
         self.sample_exp_board.rem_pcs_in_cols[8] = 1
         act_board = self.sample_exp_board.get_copy()
-        bs.reduce_rem_pcs_and_mark_sea(
-            act_board, bs.Ship(4, 8, 3, bs.Direction.RIGHT)
-        )
+        bs.reduce_rem_pcs_and_mark_sea(act_board, bs.Ship(4, 8, 3, bs.Direction.RIGHT))
         self.sample_exp_board.rem_pcs_in_rows[4] = 0
         self.sample_exp_board.rem_pcs_in_cols[8] = 0
         self.sample_exp_board.rem_pcs_in_cols[9] = 1
@@ -432,9 +390,7 @@ class BattleshipsTest(unittest.TestCase):
         self.sample_exp_board.playfield[5][3] = bs.FieldType.UNKNOWN
         self.sample_exp_board.playfield[10][5] = bs.FieldType.UNKNOWN
         act_board = self.sample_exp_board.get_copy()
-        bs.reduce_rem_pcs_and_mark_sea(
-            act_board, bs.Ship(2, 8, 2, bs.Direction.DOWN)
-        )
+        bs.reduce_rem_pcs_and_mark_sea(act_board, bs.Ship(2, 8, 2, bs.Direction.DOWN))
         self.sample_exp_board.rem_pcs_in_cols[8] = 0
         self.sample_exp_board.rem_pcs_in_rows[2] = 0
         self.sample_exp_board.rem_pcs_in_rows[3] = 2
@@ -486,9 +442,7 @@ class BattleshipsTest(unittest.TestCase):
         ship_pcs_positions = bs.get_ship_pcs_positions(self.sample_exp_board)
         for x, y in ship_pcs_positions:
             self.sample_exp_board.playfield[x][y] = bs.FieldType.UNKNOWN
-        bs.mark_uncovered_sea_positions(
-            self.sample_exp_board, ship_pcs_positions
-        )
+        bs.mark_uncovered_sea_positions(self.sample_exp_board, ship_pcs_positions)
         act_board = self.sample_exp_board.get_copy()
         act_fleet = self.sample_exp_fleet.get_copy()
         self.assertEqual(
@@ -498,39 +452,35 @@ class BattleshipsTest(unittest.TestCase):
                 [
                     bs.Ship(10, 2, 4, bs.Direction.RIGHT),
                     bs.Ship(2, 10, 1, bs.Direction.RIGHT),
-                    bs.Ship(3, 3, 3, bs.Direction.DOWN)
-                ]
+                    bs.Ship(3, 3, 3, bs.Direction.DOWN),
+                ],
             ),
-            True
+            True,
         )
         exp_board_repr = (
-            '═════════════════════════════════════════\n'
-            ' .   .   .   .   .   .   .   .   .   .   ║(0)(0)\n'
-            ' .   .   .   .   .   .   .   .   .   O   ║(1)(1)\n'
-            ' x   .   O   .   x   x   .   x   .   .   ║(1)(3)\n'
-            ' x   .   O   .   x   x   .   x   x   x   ║(1)(3)\n'
-            ' .   .   O   .   .   .   .   .   .   .   ║(1)(1)\n'
-            ' x   .   .   .   x   x   .   x   x   x   ║(0)(1)\n'
-            ' x   .   .   .   x   x   .   x   x   x   ║(0)(2)\n'
-            ' x   .   .   .   .   x   .   .   x   x   ║(0)(2)\n'
-            ' .   .   .   .   .   .   .   .   .   .   ║(0)(0)\n'
-            ' .   O   O   O   O   .   .   x   x   x   ║(4)(7)\n'
-            '═════════════════════════════════════════\n'
-            '(0) (1) (4) (1) (1) (0) (0) (0) (0) (1) \n'
-            '(1) (1) (4) (1) (6) (1) (0) (2) (2) (2) \n'
+            "═════════════════════════════════════════\n"
+            " .   .   .   .   .   .   .   .   .   .   ║(0)(0)\n"
+            " .   .   .   .   .   .   .   .   .   O   ║(1)(1)\n"
+            " x   .   O   .   x   x   .   x   .   .   ║(1)(3)\n"
+            " x   .   O   .   x   x   .   x   x   x   ║(1)(3)\n"
+            " .   .   O   .   .   .   .   .   .   .   ║(1)(1)\n"
+            " x   .   .   .   x   x   .   x   x   x   ║(0)(1)\n"
+            " x   .   .   .   x   x   .   x   x   x   ║(0)(2)\n"
+            " x   .   .   .   .   x   .   .   x   x   ║(0)(2)\n"
+            " .   .   .   .   .   .   .   .   .   .   ║(0)(0)\n"
+            " .   O   O   O   O   .   .   x   x   x   ║(4)(7)\n"
+            "═════════════════════════════════════════\n"
+            "(0) (1) (4) (1) (1) (0) (0) (0) (0) (1) \n"
+            "(1) (1) (4) (1) (6) (1) (0) (2) (2) (2) \n"
         )
         self.assertEqual(act_board, self.parse_board(exp_board_repr))
-        self.assertEqual(
-            act_fleet, bs.Fleet([4, 3, 2, 1], {4: 0, 3: 1, 2: 3, 1: 3})
-        )
+        self.assertEqual(act_fleet, bs.Fleet([4, 3, 2, 1], {4: 0, 3: 1, 2: 3, 1: 3}))
 
     def test_mark_ships_fails_when_ship_pcs_exceeded(self):
         ship_pcs_positions = bs.get_ship_pcs_positions(self.sample_exp_board)
         for x, y in ship_pcs_positions:
             self.sample_exp_board.playfield[x][y] = bs.FieldType.UNKNOWN
-        bs.mark_uncovered_sea_positions(
-            self.sample_exp_board, ship_pcs_positions
-        )
+        bs.mark_uncovered_sea_positions(self.sample_exp_board, ship_pcs_positions)
         self.assertEqual(
             bs.mark_ships(
                 self.sample_exp_board,
@@ -538,19 +488,17 @@ class BattleshipsTest(unittest.TestCase):
                 [
                     bs.Ship(10, 2, 4, bs.Direction.RIGHT),
                     bs.Ship(2, 10, 1, bs.Direction.RIGHT),
-                    bs.Ship(2, 3, 3, bs.Direction.DOWN)
-                ]
+                    bs.Ship(2, 3, 3, bs.Direction.DOWN),
+                ],
             ),
-            False
+            False,
         )
 
     def test_mark_ships_fails_when_ship_pcs_touch(self):
         ship_pcs_positions = [(10, 5)]
         for x, y in ship_pcs_positions:
             self.sample_exp_board.playfield[x][y] = bs.FieldType.UNKNOWN
-        bs.mark_uncovered_sea_positions(
-            self.sample_exp_board, ship_pcs_positions
-        )
+        bs.mark_uncovered_sea_positions(self.sample_exp_board, ship_pcs_positions)
         self.assertEqual(
             bs.mark_ships(
                 self.sample_exp_board,
@@ -558,10 +506,10 @@ class BattleshipsTest(unittest.TestCase):
                 [
                     bs.Ship(10, 2, 4, bs.Direction.RIGHT),
                     bs.Ship(2, 10, 1, bs.Direction.RIGHT),
-                    bs.Ship(2, 3, 3, bs.Direction.DOWN)
-                ]
+                    bs.Ship(2, 3, 3, bs.Direction.DOWN),
+                ],
             ),
-            False
+            False,
         )
 
     def test_get_ships_for_ship_piece_position(self):
@@ -575,7 +523,7 @@ class BattleshipsTest(unittest.TestCase):
                     bs.Ship(2, 3, 4, bs.Direction.DOWN),
                     bs.Ship(3, 3, 4, bs.Direction.DOWN),
                     bs.Ship(4, 3, 4, bs.Direction.DOWN),
-                ]
+                ],
             ),
             (
                 (5, 3, 3),
@@ -583,16 +531,16 @@ class BattleshipsTest(unittest.TestCase):
                     bs.Ship(3, 3, 3, bs.Direction.DOWN),
                     bs.Ship(4, 3, 3, bs.Direction.DOWN),
                     bs.Ship(5, 3, 3, bs.Direction.DOWN),
-                ]
+                ],
             ),
             (
                 (5, 3, 2),
                 [
                     bs.Ship(4, 3, 2, bs.Direction.DOWN),
                     bs.Ship(5, 3, 2, bs.Direction.DOWN),
-                ]
+                ],
             ),
-            ((5, 3, 1), [bs.Ship(5, 3, 1, bs.Direction.RIGHT)])
+            ((5, 3, 1), [bs.Ship(5, 3, 1, bs.Direction.RIGHT)]),
         )
         for params, value in test_data:
             with self.subTest(params):
@@ -607,23 +555,23 @@ class BattleshipsTest(unittest.TestCase):
                 [
                     bs.Ship(10, 2, 4, bs.Direction.RIGHT),
                     bs.Ship(10, 3, 4, bs.Direction.RIGHT),
-                ]
+                ],
             ),
             (
                 (10, 5, 3),
                 [
                     bs.Ship(10, 3, 3, bs.Direction.RIGHT),
                     bs.Ship(10, 4, 3, bs.Direction.RIGHT),
-                ]
+                ],
             ),
             (
                 (10, 5, 2),
                 [
                     bs.Ship(10, 4, 2, bs.Direction.RIGHT),
                     bs.Ship(10, 5, 2, bs.Direction.RIGHT),
-                ]
+                ],
             ),
-            ((10, 5, 1), [bs.Ship(10, 5, 1, bs.Direction.RIGHT)])
+            ((10, 5, 1), [bs.Ship(10, 5, 1, bs.Direction.RIGHT)]),
         )
         for params, value in test_data:
             with self.subTest(params):
@@ -631,9 +579,7 @@ class BattleshipsTest(unittest.TestCase):
                 self.assertEqual(act_board, self.sample_exp_board)
 
     def test_get_ships_for_ship_pcs_positions(self):
-        exp_ship_pcs_positions = bs.get_ship_pcs_positions(
-            self.sample_exp_board
-        )
+        exp_ship_pcs_positions = bs.get_ship_pcs_positions(self.sample_exp_board)
         act_ship_positions = [*exp_ship_pcs_positions]
         bs.mark_uncovered_sea_positions(self.sample_exp_board, [])
         self.sample_exp_board.playfield[5][3] = bs.FieldType.UNKNOWN
@@ -642,9 +588,7 @@ class BattleshipsTest(unittest.TestCase):
         exp_fleet = bs.Fleet([4, 3, 2, 1], {4: 1, 3: 2, 2: 0, 1: 4})
         act_fleet = exp_fleet.get_copy()
         self.assertEqual(
-            bs.get_fields_ships_mappings(
-                act_board, act_fleet, act_ship_positions
-            ),
+            bs.get_fields_ships_mappings(act_board, act_fleet, act_ship_positions),
             {
                 (5, 3): [
                     bs.Ship(2, 3, 4, bs.Direction.DOWN),
@@ -660,9 +604,9 @@ class BattleshipsTest(unittest.TestCase):
                     bs.Ship(10, 3, 4, bs.Direction.RIGHT),
                     bs.Ship(10, 3, 3, bs.Direction.RIGHT),
                     bs.Ship(10, 4, 3, bs.Direction.RIGHT),
-                    bs.Ship(10, 5, 1, bs.Direction.RIGHT)
-                ]
-            }
+                    bs.Ship(10, 5, 1, bs.Direction.RIGHT),
+                ],
+            },
         )
         self.assertEqual(act_board, self.sample_exp_board)
         self.assertEqual(act_fleet, exp_fleet)
@@ -676,23 +620,23 @@ class BattleshipsTest(unittest.TestCase):
             (5, 3): [
                 bs.Ship(*ship),
                 bs.Ship(5, 3, 2, bs.Direction.RIGHT),
-                bs.Ship(5, 3, 1, bs.Direction.RIGHT)
+                bs.Ship(5, 3, 1, bs.Direction.RIGHT),
             ],
             (5, 5): [
                 bs.Ship(*ship),
                 bs.Ship(5, 4, 2, bs.Direction.RIGHT),
-                bs.Ship(5, 5, 1, bs.Direction.RIGHT)
-            ]
+                bs.Ship(5, 5, 1, bs.Direction.RIGHT),
+            ],
         }
         exp_ships_for_ship_pcs_positions = {
             (5, 3): [
                 bs.Ship(5, 3, 2, bs.Direction.RIGHT),
-                bs.Ship(5, 3, 1, bs.Direction.RIGHT)
+                bs.Ship(5, 3, 1, bs.Direction.RIGHT),
             ],
             (5, 5): [
                 bs.Ship(5, 4, 2, bs.Direction.RIGHT),
-                bs.Ship(5, 5, 1, bs.Direction.RIGHT)
-            ]
+                bs.Ship(5, 5, 1, bs.Direction.RIGHT),
+            ],
         }
         bs.remove_ship_from_mappings(
             act_ship_pcs_positions, act_ships_for_ship_pcs_positions, ship
@@ -708,7 +652,7 @@ class BattleshipsTest(unittest.TestCase):
         ship = bs.Ship(5, 3, 4, bs.Direction.RIGHT)
         act_ships_for_ship_pcs_positions = {
             (5, 3): [bs.Ship(*ship), bs.Ship(5, 3, 2, bs.Direction.RIGHT)],
-            (5, 6): [bs.Ship(*ship)]
+            (5, 6): [bs.Ship(*ship)],
         }
         exp_ships_for_ship_pcs_positions = {
             (5, 3): [bs.Ship(5, 3, 2, bs.Direction.RIGHT)]
@@ -722,18 +666,16 @@ class BattleshipsTest(unittest.TestCase):
         )
 
     def test_mark_uncovered_ships(self):
-        exp_ship_pcs_positions = bs.get_ship_pcs_positions(
-            self.sample_exp_board
-        )
+        exp_ship_pcs_positions = bs.get_ship_pcs_positions(self.sample_exp_board)
         for x, y in exp_ship_pcs_positions:
             self.sample_exp_board.playfield[x][y] = bs.FieldType.UNKNOWN
         act_ship_pcs_positions = [*exp_ship_pcs_positions]
         act_ships_for_ship_pcs_positions = {
             (5, 3): [
                 bs.Ship(3, 3, 3, bs.Direction.DOWN),
-                bs.Ship(4, 3, 3, bs.Direction.DOWN)
+                bs.Ship(4, 3, 3, bs.Direction.DOWN),
             ],
-            (10, 5): [bs.Ship(10, 3, 4, bs.Direction.RIGHT)]
+            (10, 5): [bs.Ship(10, 3, 4, bs.Direction.RIGHT)],
         }
         act_board = self.sample_exp_board.get_copy()
         act_fleet = self.sample_exp_fleet.get_copy()
@@ -741,23 +683,23 @@ class BattleshipsTest(unittest.TestCase):
             act_board,
             act_fleet,
             act_ship_pcs_positions,
-            act_ships_for_ship_pcs_positions
+            act_ships_for_ship_pcs_positions,
         )
         exp_board_repr = (
-            '═════════════════════════════════════════\n'
-            ' x   x   x   .   x   .   x   x   x   x   ║(0)(0)\n'
-            ' x   x   x   .   x   .   x   x   x   x   ║(0)(1)\n'
-            ' x   x   x   .   x   .   x   x   x   x   ║(0)(3)\n'
-            ' x   x   x   .   x   .   x   x   x   x   ║(0)(3)\n'
-            ' x   x   x   .   x   .   x   x   x   x   ║(0)(1)\n'
-            ' x   x   x   .   x   .   x   x   x   x   ║(0)(1)\n'
-            ' x   x   x   .   x   .   x   x   x   x   ║(0)(2)\n'
-            ' x   x   .   .   .   .   x   .   x   x   ║(0)(2)\n'
-            ' x   .   .   .   .   .   .   x   x   x   ║(0)(0)\n'
-            ' x   .   O   O   O   O   .   x   x   x   ║(4)(7)\n'
-            '═════════════════════════════════════════\n'
-            '(0) (0) (1) (1) (1) (1) (0) (0) (0) (0) \n'
-            '(1) (1) (4) (1) (6) (1) (0) (2) (2) (2) \n'
+            "═════════════════════════════════════════\n"
+            " x   x   x   .   x   .   x   x   x   x   ║(0)(0)\n"
+            " x   x   x   .   x   .   x   x   x   x   ║(0)(1)\n"
+            " x   x   x   .   x   .   x   x   x   x   ║(0)(3)\n"
+            " x   x   x   .   x   .   x   x   x   x   ║(0)(3)\n"
+            " x   x   x   .   x   .   x   x   x   x   ║(0)(1)\n"
+            " x   x   x   .   x   .   x   x   x   x   ║(0)(1)\n"
+            " x   x   x   .   x   .   x   x   x   x   ║(0)(2)\n"
+            " x   x   .   .   .   .   x   .   x   x   ║(0)(2)\n"
+            " x   .   .   .   .   .   .   x   x   x   ║(0)(0)\n"
+            " x   .   O   O   O   O   .   x   x   x   ║(4)(7)\n"
+            "═════════════════════════════════════════\n"
+            "(0) (0) (1) (1) (1) (1) (0) (0) (0) (0) \n"
+            "(1) (1) (4) (1) (6) (1) (0) (2) (2) (2) \n"
         )
         self.sample_exp_fleet.subfleet_sizes[4] = 0
         self.assertEqual(act_board, self.parse_board(exp_board_repr))
@@ -768,15 +710,14 @@ class BattleshipsTest(unittest.TestCase):
             {
                 (5, 3): [
                     bs.Ship(3, 3, 3, bs.Direction.DOWN),
-                    bs.Ship(4, 3, 3, bs.Direction.DOWN)
+                    bs.Ship(4, 3, 3, bs.Direction.DOWN),
                 ]
-            }
+            },
         )
 
     def test_get_ships_of_length(self):
         bs.mark_uncovered_sea_positions(
-            self.sample_exp_board,
-            bs.get_ship_pcs_positions(self.sample_exp_board)
+            self.sample_exp_board, bs.get_ship_pcs_positions(self.sample_exp_board)
         )
         self.sample_exp_board.playfield[5][3] = bs.FieldType.UNKNOWN
         self.sample_exp_board.playfield[10][5] = bs.FieldType.UNKNOWN
@@ -791,7 +732,7 @@ class BattleshipsTest(unittest.TestCase):
                     bs.Ship(10, 1, 4, bs.Direction.RIGHT),
                     bs.Ship(10, 2, 4, bs.Direction.RIGHT),
                     bs.Ship(10, 3, 4, bs.Direction.RIGHT),
-                ]
+                ],
             ),
             (
                 3,
@@ -812,40 +753,38 @@ class BattleshipsTest(unittest.TestCase):
                     bs.Ship(10, 3, 3, bs.Direction.RIGHT),
                     bs.Ship(10, 4, 3, bs.Direction.RIGHT),
                     bs.Ship(10, 8, 3, bs.Direction.RIGHT),
-                ]
-            )
+                ],
+            ),
         )
         for ship_length, ships in test_data:
             with self.subTest(ship_length):
-                self.assertEqual(
-                    bs.get_ships_of_length(act_board, ship_length), ships
-                )
+                self.assertEqual(bs.get_ships_of_length(act_board, ship_length), ships)
                 self.assertEqual(act_board, self.sample_exp_board)
 
     def test_find_and_add_solutions_without_some_ship_types(self):
         act_board_repr = (
-            '═════════════════════\n'
-            ' x   x   x   x   x   ║(0)(0)\n'
-            ' x   x   x   x   x   ║(0)(4)\n'
-            ' x   x   x   x   x   ║(0)(0)\n'
-            ' x   x   x   x   x   ║(0)(1)\n'
-            ' x   x   x   x   x   ║(0)(1)\n'
-            '═════════════════════\n'
-            '(0) (0) (0) (0) (0) \n'
-            '(1) (1) (1) (1) (2) \n'
+            "═════════════════════\n"
+            " x   x   x   x   x   ║(0)(0)\n"
+            " x   x   x   x   x   ║(0)(4)\n"
+            " x   x   x   x   x   ║(0)(0)\n"
+            " x   x   x   x   x   ║(0)(1)\n"
+            " x   x   x   x   x   ║(0)(1)\n"
+            "═════════════════════\n"
+            "(0) (0) (0) (0) (0) \n"
+            "(1) (1) (1) (1) (2) \n"
         )
         act_board = self.parse_board(act_board_repr)
         exp_board = act_board.get_copy()
         solution_board_repr = (
-            '═════════════════════\n'
-            ' .   .   .   .   .   ║(0)(0)\n'
-            ' O   O   O   O   .   ║(4)(4)\n'
-            ' .   .   .   .   .   ║(0)(0)\n'
-            ' .   .   .   .   O   ║(1)(1)\n'
-            ' .   .   .   .   O   ║(1)(1)\n'
-            '═════════════════════\n'
-            '(1) (1) (1) (1) (2) \n'
-            '(1) (1) (1) (1) (2) \n'
+            "═════════════════════\n"
+            " .   .   .   .   .   ║(0)(0)\n"
+            " O   O   O   O   .   ║(4)(4)\n"
+            " .   .   .   .   .   ║(0)(0)\n"
+            " .   .   .   .   O   ║(1)(1)\n"
+            " .   .   .   .   O   ║(1)(1)\n"
+            "═════════════════════\n"
+            "(1) (1) (1) (1) (2) \n"
+            "(1) (1) (1) (1) (2) \n"
         )
         act_fleet = bs.Fleet([4, 3, 2, 1], {4: 1, 3: 0, 2: 1, 1: 0})
         exp_fleet = act_fleet.get_copy()
@@ -853,38 +792,36 @@ class BattleshipsTest(unittest.TestCase):
         bs.find_solutions_for_subfleet(act_board, act_fleet, 0, act_solutions)
         self.assertEqual(act_board, exp_board)
         self.assertEqual(act_fleet, exp_fleet)
-        self.assertEqual(
-            act_solutions, [self.parse_board(solution_board_repr)]
-        )
+        self.assertEqual(act_solutions, [self.parse_board(solution_board_repr)])
 
     def test_find_and_add_solutions_multiple_ship_positions(self):
         act_board_repr = (
-            '═════════════════════════════\n'
-            ' .   .   x   x   x   x   x   ║(0)(1)\n'
-            ' .   x   x   x   x   x   x   ║(0)(1)\n'
-            ' .   x   x   x   x   x   x   ║(0)(2)\n'
-            ' .   x   x   x   x   x   x   ║(0)(2)\n'
-            ' .   x   x   x   x   x   x   ║(0)(2)\n'
-            ' .   .   .   .   .   .   .   ║(0)(0)\n'
-            ' .   x   x   x   x   x   x   ║(0)(4)\n'
-            '═════════════════════════════\n'
-            '(0) (0) (0) (0) (0) (0) (0) \n'
-            '(0) (5) (1) (1) (1) (1) (3) \n'
+            "═════════════════════════════\n"
+            " .   .   x   x   x   x   x   ║(0)(1)\n"
+            " .   x   x   x   x   x   x   ║(0)(1)\n"
+            " .   x   x   x   x   x   x   ║(0)(2)\n"
+            " .   x   x   x   x   x   x   ║(0)(2)\n"
+            " .   x   x   x   x   x   x   ║(0)(2)\n"
+            " .   .   .   .   .   .   .   ║(0)(0)\n"
+            " .   x   x   x   x   x   x   ║(0)(4)\n"
+            "═════════════════════════════\n"
+            "(0) (0) (0) (0) (0) (0) (0) \n"
+            "(0) (5) (1) (1) (1) (1) (3) \n"
         )
         act_board = self.parse_board(act_board_repr)
         exp_board = act_board.get_copy()
         solution_board_repr = (
-            '═════════════════════════════\n'
-            ' .   .   .   O   .   .   .   ║(1)(1)\n'
-            ' .   O   .   .   .   .   .   ║(1)(1)\n'
-            ' .   O   .   .   .   .   O   ║(2)(2)\n'
-            ' .   O   .   .   .   .   O   ║(2)(2)\n'
-            ' .   O   .   .   .   .   O   ║(2)(2)\n'
-            ' .   .   .   .   .   .   .   ║(0)(0)\n'
-            ' .   O   O   .   O   O   .   ║(4)(4)\n'
-            '═════════════════════════════\n'
-            '(0) (5) (1) (1) (1) (1) (3) \n'
-            '(0) (5) (1) (1) (1) (1) (3) \n'
+            "═════════════════════════════\n"
+            " .   .   .   O   .   .   .   ║(1)(1)\n"
+            " .   O   .   .   .   .   .   ║(1)(1)\n"
+            " .   O   .   .   .   .   O   ║(2)(2)\n"
+            " .   O   .   .   .   .   O   ║(2)(2)\n"
+            " .   O   .   .   .   .   O   ║(2)(2)\n"
+            " .   .   .   .   .   .   .   ║(0)(0)\n"
+            " .   O   O   .   O   O   .   ║(4)(4)\n"
+            "═════════════════════════════\n"
+            "(0) (5) (1) (1) (1) (1) (3) \n"
+            "(0) (5) (1) (1) (1) (1) (3) \n"
         )
         act_fleet = bs.Fleet([4, 3, 2, 1], {4: 1, 3: 1, 2: 2, 1: 1})
         exp_fleet = act_fleet.get_copy()
@@ -892,17 +829,13 @@ class BattleshipsTest(unittest.TestCase):
         bs.find_solutions_for_subfleet(act_board, act_fleet, 0, act_solutions)
         self.assertEqual(act_board, exp_board)
         self.assertEqual(act_fleet, exp_fleet)
-        self.assertEqual(
-            act_solutions, [self.parse_board(solution_board_repr)]
-        )
+        self.assertEqual(act_solutions, [self.parse_board(solution_board_repr)])
 
     def test_get_solution_boards_without_ships(self):
         ship_pcs_positions = bs.get_ship_pcs_positions(self.sample_exp_board)
         for x, y in ship_pcs_positions:
             self.sample_exp_board.playfield[x][y] = bs.FieldType.UNKNOWN
-        bs.mark_uncovered_sea_positions(
-            self.sample_exp_board, ship_pcs_positions
-        )
+        bs.mark_uncovered_sea_positions(self.sample_exp_board, ship_pcs_positions)
         act_board = self.sample_exp_board.get_copy()
         act_fleet = self.sample_exp_fleet.get_copy()
         act_ships_for_ship_pcs_positions = {}
@@ -910,84 +843,84 @@ class BattleshipsTest(unittest.TestCase):
             act_board, act_fleet, act_ships_for_ship_pcs_positions
         )
         solution1 = (
-            '═════════════════════════════════════════\n'
-            ' .   .   .   .   .   .   .   .   .   .   ║(0)(0)\n'
-            ' .   .   .   .   O   .   .   .   .   .   ║(1)(1)\n'
-            ' O   .   O   .   O   .   .   .   .   .   ║(3)(3)\n'
-            ' .   .   O   .   O   .   .   O   .   .   ║(3)(3)\n'
-            ' .   .   .   .   O   .   .   .   .   .   ║(1)(1)\n'
-            ' .   .   O   .   .   .   .   .   .   .   ║(1)(1)\n'
-            ' .   .   O   .   O   .   .   .   .   .   ║(2)(2)\n'
-            ' .   .   .   .   .   .   .   .   O   O   ║(2)(2)\n'
-            ' .   .   .   .   .   .   .   .   .   .   ║(0)(0)\n'
-            ' .   O   .   O   O   O   .   O   O   O   ║(7)(7)\n'
-            '═════════════════════════════════════════\n'
-            '(1) (1) (4) (1) (6) (1) (0) (2) (2) (2) \n'
-            '(1) (1) (4) (1) (6) (1) (0) (2) (2) (2) \n'
+            "═════════════════════════════════════════\n"
+            " .   .   .   .   .   .   .   .   .   .   ║(0)(0)\n"
+            " .   .   .   .   O   .   .   .   .   .   ║(1)(1)\n"
+            " O   .   O   .   O   .   .   .   .   .   ║(3)(3)\n"
+            " .   .   O   .   O   .   .   O   .   .   ║(3)(3)\n"
+            " .   .   .   .   O   .   .   .   .   .   ║(1)(1)\n"
+            " .   .   O   .   .   .   .   .   .   .   ║(1)(1)\n"
+            " .   .   O   .   O   .   .   .   .   .   ║(2)(2)\n"
+            " .   .   .   .   .   .   .   .   O   O   ║(2)(2)\n"
+            " .   .   .   .   .   .   .   .   .   .   ║(0)(0)\n"
+            " .   O   .   O   O   O   .   O   O   O   ║(7)(7)\n"
+            "═════════════════════════════════════════\n"
+            "(1) (1) (4) (1) (6) (1) (0) (2) (2) (2) \n"
+            "(1) (1) (4) (1) (6) (1) (0) (2) (2) (2) \n"
         )
         solution2 = (
-            '═════════════════════════════════════════\n'
-            ' .   .   .   .   .   .   .   .   .   .   ║(0)(0)\n'
-            ' .   .   .   .   O   .   .   .   .   .   ║(1)(1)\n'
-            ' .   .   O   .   O   .   .   O   .   .   ║(3)(3)\n'
-            ' O   .   O   .   O   .   .   .   .   .   ║(3)(3)\n'
-            ' .   .   .   .   O   .   .   .   .   .   ║(1)(1)\n'
-            ' .   .   O   .   .   .   .   .   .   .   ║(1)(1)\n'
-            ' .   .   O   .   O   .   .   .   .   .   ║(2)(2)\n'
-            ' .   .   .   .   .   .   .   .   O   O   ║(2)(2)\n'
-            ' .   .   .   .   .   .   .   .   .   .   ║(0)(0)\n'
-            ' .   O   .   O   O   O   .   O   O   O   ║(7)(7)\n'
-            '═════════════════════════════════════════\n'
-            '(1) (1) (4) (1) (6) (1) (0) (2) (2) (2) \n'
-            '(1) (1) (4) (1) (6) (1) (0) (2) (2) (2) \n'
+            "═════════════════════════════════════════\n"
+            " .   .   .   .   .   .   .   .   .   .   ║(0)(0)\n"
+            " .   .   .   .   O   .   .   .   .   .   ║(1)(1)\n"
+            " .   .   O   .   O   .   .   O   .   .   ║(3)(3)\n"
+            " O   .   O   .   O   .   .   .   .   .   ║(3)(3)\n"
+            " .   .   .   .   O   .   .   .   .   .   ║(1)(1)\n"
+            " .   .   O   .   .   .   .   .   .   .   ║(1)(1)\n"
+            " .   .   O   .   O   .   .   .   .   .   ║(2)(2)\n"
+            " .   .   .   .   .   .   .   .   O   O   ║(2)(2)\n"
+            " .   .   .   .   .   .   .   .   .   .   ║(0)(0)\n"
+            " .   O   .   O   O   O   .   O   O   O   ║(7)(7)\n"
+            "═════════════════════════════════════════\n"
+            "(1) (1) (4) (1) (6) (1) (0) (2) (2) (2) \n"
+            "(1) (1) (4) (1) (6) (1) (0) (2) (2) (2) \n"
         )
         solution3 = (
-            '═════════════════════════════════════════\n'
-            ' .   .   .   .   .   .   .   .   .   .   ║(0)(0)\n'
-            ' .   .   .   .   O   .   .   .   .   .   ║(1)(1)\n'
-            ' .   .   O   .   O   .   .   O   .   .   ║(3)(3)\n'
-            ' .   .   O   .   O   .   .   .   .   O   ║(3)(3)\n'
-            ' .   .   O   .   .   .   .   .   .   .   ║(1)(1)\n'
-            ' .   .   .   .   O   .   .   .   .   .   ║(1)(1)\n'
-            ' .   O   .   .   O   .   .   .   .   .   ║(2)(2)\n'
-            ' .   .   .   .   .   .   .   .   O   O   ║(2)(2)\n'
-            ' .   .   .   .   .   .   .   .   .   .   ║(0)(0)\n'
-            ' O   .   O   O   O   O   .   O   O   .   ║(7)(7)\n'
-            '═════════════════════════════════════════\n'
-            '(1) (1) (4) (1) (6) (1) (0) (2) (2) (2) \n'
-            '(1) (1) (4) (1) (6) (1) (0) (2) (2) (2) \n'
+            "═════════════════════════════════════════\n"
+            " .   .   .   .   .   .   .   .   .   .   ║(0)(0)\n"
+            " .   .   .   .   O   .   .   .   .   .   ║(1)(1)\n"
+            " .   .   O   .   O   .   .   O   .   .   ║(3)(3)\n"
+            " .   .   O   .   O   .   .   .   .   O   ║(3)(3)\n"
+            " .   .   O   .   .   .   .   .   .   .   ║(1)(1)\n"
+            " .   .   .   .   O   .   .   .   .   .   ║(1)(1)\n"
+            " .   O   .   .   O   .   .   .   .   .   ║(2)(2)\n"
+            " .   .   .   .   .   .   .   .   O   O   ║(2)(2)\n"
+            " .   .   .   .   .   .   .   .   .   .   ║(0)(0)\n"
+            " O   .   O   O   O   O   .   O   O   .   ║(7)(7)\n"
+            "═════════════════════════════════════════\n"
+            "(1) (1) (4) (1) (6) (1) (0) (2) (2) (2) \n"
+            "(1) (1) (4) (1) (6) (1) (0) (2) (2) (2) \n"
         )
         solution4 = (
-            '═════════════════════════════════════════\n'
-            ' .   .   .   .   .   .   .   .   .   .   ║(0)(0)\n'
-            ' .   .   .   .   O   .   .   .   .   .   ║(1)(1)\n'
-            ' .   .   O   .   O   .   .   .   .   O   ║(3)(3)\n'
-            ' .   .   O   .   O   .   .   O   .   .   ║(3)(3)\n'
-            ' .   .   O   .   .   .   .   .   .   .   ║(1)(1)\n'
-            ' .   .   .   .   O   .   .   .   .   .   ║(1)(1)\n'
-            ' .   O   .   .   O   .   .   .   .   .   ║(2)(2)\n'
-            ' .   .   .   .   .   .   .   .   O   O   ║(2)(2)\n'
-            ' .   .   .   .   .   .   .   .   .   .   ║(0)(0)\n'
-            ' O   .   O   O   O   O   .   O   O   .   ║(7)(7)\n'
-            '═════════════════════════════════════════\n'
-            '(1) (1) (4) (1) (6) (1) (0) (2) (2) (2) \n'
-            '(1) (1) (4) (1) (6) (1) (0) (2) (2) (2) \n'
+            "═════════════════════════════════════════\n"
+            " .   .   .   .   .   .   .   .   .   .   ║(0)(0)\n"
+            " .   .   .   .   O   .   .   .   .   .   ║(1)(1)\n"
+            " .   .   O   .   O   .   .   .   .   O   ║(3)(3)\n"
+            " .   .   O   .   O   .   .   O   .   .   ║(3)(3)\n"
+            " .   .   O   .   .   .   .   .   .   .   ║(1)(1)\n"
+            " .   .   .   .   O   .   .   .   .   .   ║(1)(1)\n"
+            " .   O   .   .   O   .   .   .   .   .   ║(2)(2)\n"
+            " .   .   .   .   .   .   .   .   O   O   ║(2)(2)\n"
+            " .   .   .   .   .   .   .   .   .   .   ║(0)(0)\n"
+            " O   .   O   O   O   O   .   O   O   .   ║(7)(7)\n"
+            "═════════════════════════════════════════\n"
+            "(1) (1) (4) (1) (6) (1) (0) (2) (2) (2) \n"
+            "(1) (1) (4) (1) (6) (1) (0) (2) (2) (2) \n"
         )
         solution5 = (
-            '═════════════════════════════════════════\n'
-            ' .   .   .   .   .   .   .   .   .   .   ║(0)(0)\n'
-            ' .   .   .   .   O   .   .   .   .   .   ║(1)(1)\n'
-            ' .   O   O   .   O   .   .   .   .   .   ║(3)(3)\n'
-            ' .   .   .   .   O   .   .   O   O   .   ║(3)(3)\n'
-            ' .   .   O   .   .   .   .   .   .   .   ║(1)(1)\n'
-            ' .   .   .   .   O   .   .   .   .   .   ║(1)(1)\n'
-            ' .   .   O   .   O   .   .   .   .   .   ║(2)(2)\n'
-            ' O   .   .   .   .   .   .   .   .   O   ║(2)(2)\n'
-            ' .   .   .   .   .   .   .   .   .   .   ║(0)(0)\n'
-            ' .   .   O   O   O   O   .   O   O   O   ║(7)(7)\n'
-            '═════════════════════════════════════════\n'
-            '(1) (1) (4) (1) (6) (1) (0) (2) (2) (2) \n'
-            '(1) (1) (4) (1) (6) (1) (0) (2) (2) (2) \n'
+            "═════════════════════════════════════════\n"
+            " .   .   .   .   .   .   .   .   .   .   ║(0)(0)\n"
+            " .   .   .   .   O   .   .   .   .   .   ║(1)(1)\n"
+            " .   O   O   .   O   .   .   .   .   .   ║(3)(3)\n"
+            " .   .   .   .   O   .   .   O   O   .   ║(3)(3)\n"
+            " .   .   O   .   .   .   .   .   .   .   ║(1)(1)\n"
+            " .   .   .   .   O   .   .   .   .   .   ║(1)(1)\n"
+            " .   .   O   .   O   .   .   .   .   .   ║(2)(2)\n"
+            " O   .   .   .   .   .   .   .   .   O   ║(2)(2)\n"
+            " .   .   .   .   .   .   .   .   .   .   ║(0)(0)\n"
+            " .   .   O   O   O   O   .   O   O   O   ║(7)(7)\n"
+            "═════════════════════════════════════════\n"
+            "(1) (1) (4) (1) (6) (1) (0) (2) (2) (2) \n"
+            "(1) (1) (4) (1) (6) (1) (0) (2) (2) (2) \n"
         )
         self.assertEqual(
             act_solutions,
@@ -996,8 +929,8 @@ class BattleshipsTest(unittest.TestCase):
                 self.parse_board(solution2),
                 self.parse_board(solution3),
                 self.parse_board(solution4),
-                self.parse_board(solution5)
-            ]
+                self.parse_board(solution5),
+            ],
         )
         self.assertEqual(act_board, self.sample_exp_board)
         self.assertEqual(act_fleet, self.sample_exp_fleet)
@@ -1007,9 +940,7 @@ class BattleshipsTest(unittest.TestCase):
         ship_pcs_positions = bs.get_ship_pcs_positions(self.sample_exp_board)
         for x, y in ship_pcs_positions:
             self.sample_exp_board.playfield[x][y] = bs.FieldType.UNKNOWN
-        bs.mark_uncovered_sea_positions(
-            self.sample_exp_board, ship_pcs_positions
-        )
+        bs.mark_uncovered_sea_positions(self.sample_exp_board, ship_pcs_positions)
         act_board = self.sample_exp_board.get_copy()
         act_fleet = self.sample_exp_fleet.get_copy()
         act_ships_for_ship_pcs_positions = bs.get_fields_ships_mappings(
@@ -1020,60 +951,60 @@ class BattleshipsTest(unittest.TestCase):
             act_board, act_fleet, act_ships_for_ship_pcs_positions
         )
         solution1 = (
-            '═════════════════════════════════════════\n'
-            ' .   .   .   .   .   .   .   .   .   .   ║(0)(0)\n'
-            ' .   .   .   .   O   .   .   .   .   .   ║(1)(1)\n'
-            ' .   .   O   .   O   .   .   O   .   .   ║(3)(3)\n'
-            ' .   .   O   .   O   .   .   .   .   O   ║(3)(3)\n'
-            ' .   .   O   .   .   .   .   .   .   .   ║(1)(1)\n'
-            ' .   .   .   .   O   .   .   .   .   .   ║(1)(1)\n'
-            ' .   O   .   .   O   .   .   .   .   .   ║(2)(2)\n'
-            ' .   .   .   .   .   .   .   .   O   O   ║(2)(2)\n'
-            ' .   .   .   .   .   .   .   .   .   .   ║(0)(0)\n'
-            ' O   .   O   O   O   O   .   O   O   .   ║(7)(7)\n'
-            '═════════════════════════════════════════\n'
-            '(1) (1) (4) (1) (6) (1) (0) (2) (2) (2) \n'
-            '(1) (1) (4) (1) (6) (1) (0) (2) (2) (2) \n'
+            "═════════════════════════════════════════\n"
+            " .   .   .   .   .   .   .   .   .   .   ║(0)(0)\n"
+            " .   .   .   .   O   .   .   .   .   .   ║(1)(1)\n"
+            " .   .   O   .   O   .   .   O   .   .   ║(3)(3)\n"
+            " .   .   O   .   O   .   .   .   .   O   ║(3)(3)\n"
+            " .   .   O   .   .   .   .   .   .   .   ║(1)(1)\n"
+            " .   .   .   .   O   .   .   .   .   .   ║(1)(1)\n"
+            " .   O   .   .   O   .   .   .   .   .   ║(2)(2)\n"
+            " .   .   .   .   .   .   .   .   O   O   ║(2)(2)\n"
+            " .   .   .   .   .   .   .   .   .   .   ║(0)(0)\n"
+            " O   .   O   O   O   O   .   O   O   .   ║(7)(7)\n"
+            "═════════════════════════════════════════\n"
+            "(1) (1) (4) (1) (6) (1) (0) (2) (2) (2) \n"
+            "(1) (1) (4) (1) (6) (1) (0) (2) (2) (2) \n"
         )
         solution2 = (
-            '═════════════════════════════════════════\n'
-            ' .   .   .   .   .   .   .   .   .   .   ║(0)(0)\n'
-            ' .   .   .   .   O   .   .   .   .   .   ║(1)(1)\n'
-            ' .   .   O   .   O   .   .   .   .   O   ║(3)(3)\n'
-            ' .   .   O   .   O   .   .   O   .   .   ║(3)(3)\n'
-            ' .   .   O   .   .   .   .   .   .   .   ║(1)(1)\n'
-            ' .   .   .   .   O   .   .   .   .   .   ║(1)(1)\n'
-            ' .   O   .   .   O   .   .   .   .   .   ║(2)(2)\n'
-            ' .   .   .   .   .   .   .   .   O   O   ║(2)(2)\n'
-            ' .   .   .   .   .   .   .   .   .   .   ║(0)(0)\n'
-            ' O   .   O   O   O   O   .   O   O   .   ║(7)(7)\n'
-            '═════════════════════════════════════════\n'
-            '(1) (1) (4) (1) (6) (1) (0) (2) (2) (2) \n'
-            '(1) (1) (4) (1) (6) (1) (0) (2) (2) (2) \n'
+            "═════════════════════════════════════════\n"
+            " .   .   .   .   .   .   .   .   .   .   ║(0)(0)\n"
+            " .   .   .   .   O   .   .   .   .   .   ║(1)(1)\n"
+            " .   .   O   .   O   .   .   .   .   O   ║(3)(3)\n"
+            " .   .   O   .   O   .   .   O   .   .   ║(3)(3)\n"
+            " .   .   O   .   .   .   .   .   .   .   ║(1)(1)\n"
+            " .   .   .   .   O   .   .   .   .   .   ║(1)(1)\n"
+            " .   O   .   .   O   .   .   .   .   .   ║(2)(2)\n"
+            " .   .   .   .   .   .   .   .   O   O   ║(2)(2)\n"
+            " .   .   .   .   .   .   .   .   .   .   ║(0)(0)\n"
+            " O   .   O   O   O   O   .   O   O   .   ║(7)(7)\n"
+            "═════════════════════════════════════════\n"
+            "(1) (1) (4) (1) (6) (1) (0) (2) (2) (2) \n"
+            "(1) (1) (4) (1) (6) (1) (0) (2) (2) (2) \n"
         )
         solution3 = (
-            '═════════════════════════════════════════\n'
-            ' .   .   .   .   .   .   .   .   .   .   ║(0)(0)\n'
-            ' .   .   .   .   O   .   .   .   .   .   ║(1)(1)\n'
-            ' .   O   O   .   O   .   .   .   .   .   ║(3)(3)\n'
-            ' .   .   .   .   O   .   .   O   O   .   ║(3)(3)\n'
-            ' .   .   O   .   .   .   .   .   .   .   ║(1)(1)\n'
-            ' .   .   .   .   O   .   .   .   .   .   ║(1)(1)\n'
-            ' .   .   O   .   O   .   .   .   .   .   ║(2)(2)\n'
-            ' O   .   .   .   .   .   .   .   .   O   ║(2)(2)\n'
-            ' .   .   .   .   .   .   .   .   .   .   ║(0)(0)\n'
-            ' .   .   O   O   O   O   .   O   O   O   ║(7)(7)\n'
-            '═════════════════════════════════════════\n'
-            '(1) (1) (4) (1) (6) (1) (0) (2) (2) (2) \n'
-            '(1) (1) (4) (1) (6) (1) (0) (2) (2) (2) \n'
+            "═════════════════════════════════════════\n"
+            " .   .   .   .   .   .   .   .   .   .   ║(0)(0)\n"
+            " .   .   .   .   O   .   .   .   .   .   ║(1)(1)\n"
+            " .   O   O   .   O   .   .   .   .   .   ║(3)(3)\n"
+            " .   .   .   .   O   .   .   O   O   .   ║(3)(3)\n"
+            " .   .   O   .   .   .   .   .   .   .   ║(1)(1)\n"
+            " .   .   .   .   O   .   .   .   .   .   ║(1)(1)\n"
+            " .   .   O   .   O   .   .   .   .   .   ║(2)(2)\n"
+            " O   .   .   .   .   .   .   .   .   O   ║(2)(2)\n"
+            " .   .   .   .   .   .   .   .   .   .   ║(0)(0)\n"
+            " .   .   O   O   O   O   .   O   O   O   ║(7)(7)\n"
+            "═════════════════════════════════════════\n"
+            "(1) (1) (4) (1) (6) (1) (0) (2) (2) (2) \n"
+            "(1) (1) (4) (1) (6) (1) (0) (2) (2) (2) \n"
         )
         self.assertEqual(
             act_solutions,
             [
                 self.parse_board(solution1),
                 self.parse_board(solution2),
-                self.parse_board(solution3)
-            ]
+                self.parse_board(solution3),
+            ],
         )
         self.assertEqual(act_board, self.sample_exp_board)
         self.assertEqual(act_fleet, self.sample_exp_fleet)
@@ -1084,19 +1015,17 @@ class BattleshipsTest(unittest.TestCase):
     def test_parse_test_config(self):
         self.assertEqual(
             Path(self.base_dir).joinpath("tests/sample_boards/board01.txt"),
-            Path(self.sample_config["GAMEDATA"]["FILEPATH"])
+            Path(self.sample_config["GAMEDATA"]["FILEPATH"]),
         )
         self.assertEqual("O", self.sample_config["FIELDTYPESYMBOLS"]["SHIP"])
         self.assertEqual(".", self.sample_config["FIELDTYPESYMBOLS"]["SEA"])
-        self.assertEqual(
-            "x", self.sample_config["FIELDTYPESYMBOLS"]["UNKNOWN"]
-        )
+        self.assertEqual("x", self.sample_config["FIELDTYPESYMBOLS"]["UNKNOWN"])
 
     def test_parse_default_config(self):
         default_config = bs.parse_config()
         self.assertEqual(
             Path(self.base_dir).joinpath("tests/sample_boards/board01.txt"),
-            Path(self.sample_config["GAMEDATA"]["FILEPATH"])
+            Path(self.sample_config["GAMEDATA"]["FILEPATH"]),
         )
         self.assertEqual("O", default_config["FIELDTYPESYMBOLS"]["SHIP"])
         self.assertEqual(".", default_config["FIELDTYPESYMBOLS"]["SEA"])
@@ -1104,69 +1033,68 @@ class BattleshipsTest(unittest.TestCase):
 
     def test_get_solutions_when_has_solutions(self):
         solution1 = (
-            '═════════════════════════════════════════\n'
-            ' .   .   .   .   .   .   .   .   .   .   ║(0)(0)\n'
-            ' .   .   .   .   O   .   .   .   .   .   ║(1)(1)\n'
-            ' .   .   O   .   O   .   .   O   .   .   ║(3)(3)\n'
-            ' .   .   O   .   O   .   .   .   .   O   ║(3)(3)\n'
-            ' .   .   O   .   .   .   .   .   .   .   ║(1)(1)\n'
-            ' .   .   .   .   O   .   .   .   .   .   ║(1)(1)\n'
-            ' .   O   .   .   O   .   .   .   .   .   ║(2)(2)\n'
-            ' .   .   .   .   .   .   .   .   O   O   ║(2)(2)\n'
-            ' .   .   .   .   .   .   .   .   .   .   ║(0)(0)\n'
-            ' O   .   O   O   O   O   .   O   O   .   ║(7)(7)\n'
-            '═════════════════════════════════════════\n'
-            '(1) (1) (4) (1) (6) (1) (0) (2) (2) (2) \n'
-            '(1) (1) (4) (1) (6) (1) (0) (2) (2) (2) \n'
+            "═════════════════════════════════════════\n"
+            " .   .   .   .   .   .   .   .   .   .   ║(0)(0)\n"
+            " .   .   .   .   O   .   .   .   .   .   ║(1)(1)\n"
+            " .   .   O   .   O   .   .   O   .   .   ║(3)(3)\n"
+            " .   .   O   .   O   .   .   .   .   O   ║(3)(3)\n"
+            " .   .   O   .   .   .   .   .   .   .   ║(1)(1)\n"
+            " .   .   .   .   O   .   .   .   .   .   ║(1)(1)\n"
+            " .   O   .   .   O   .   .   .   .   .   ║(2)(2)\n"
+            " .   .   .   .   .   .   .   .   O   O   ║(2)(2)\n"
+            " .   .   .   .   .   .   .   .   .   .   ║(0)(0)\n"
+            " O   .   O   O   O   O   .   O   O   .   ║(7)(7)\n"
+            "═════════════════════════════════════════\n"
+            "(1) (1) (4) (1) (6) (1) (0) (2) (2) (2) \n"
+            "(1) (1) (4) (1) (6) (1) (0) (2) (2) (2) \n"
         )
         solution2 = (
-            '═════════════════════════════════════════\n'
-            ' .   .   .   .   .   .   .   .   .   .   ║(0)(0)\n'
-            ' .   .   .   .   O   .   .   .   .   .   ║(1)(1)\n'
-            ' .   .   O   .   O   .   .   .   .   O   ║(3)(3)\n'
-            ' .   .   O   .   O   .   .   O   .   .   ║(3)(3)\n'
-            ' .   .   O   .   .   .   .   .   .   .   ║(1)(1)\n'
-            ' .   .   .   .   O   .   .   .   .   .   ║(1)(1)\n'
-            ' .   O   .   .   O   .   .   .   .   .   ║(2)(2)\n'
-            ' .   .   .   .   .   .   .   .   O   O   ║(2)(2)\n'
-            ' .   .   .   .   .   .   .   .   .   .   ║(0)(0)\n'
-            ' O   .   O   O   O   O   .   O   O   .   ║(7)(7)\n'
-            '═════════════════════════════════════════\n'
-            '(1) (1) (4) (1) (6) (1) (0) (2) (2) (2) \n'
-            '(1) (1) (4) (1) (6) (1) (0) (2) (2) (2) \n'
+            "═════════════════════════════════════════\n"
+            " .   .   .   .   .   .   .   .   .   .   ║(0)(0)\n"
+            " .   .   .   .   O   .   .   .   .   .   ║(1)(1)\n"
+            " .   .   O   .   O   .   .   .   .   O   ║(3)(3)\n"
+            " .   .   O   .   O   .   .   O   .   .   ║(3)(3)\n"
+            " .   .   O   .   .   .   .   .   .   .   ║(1)(1)\n"
+            " .   .   .   .   O   .   .   .   .   .   ║(1)(1)\n"
+            " .   O   .   .   O   .   .   .   .   .   ║(2)(2)\n"
+            " .   .   .   .   .   .   .   .   O   O   ║(2)(2)\n"
+            " .   .   .   .   .   .   .   .   .   .   ║(0)(0)\n"
+            " O   .   O   O   O   O   .   O   O   .   ║(7)(7)\n"
+            "═════════════════════════════════════════\n"
+            "(1) (1) (4) (1) (6) (1) (0) (2) (2) (2) \n"
+            "(1) (1) (4) (1) (6) (1) (0) (2) (2) (2) \n"
         )
         solution3 = (
-            '═════════════════════════════════════════\n'
-            ' .   .   .   .   .   .   .   .   .   .   ║(0)(0)\n'
-            ' .   .   .   .   O   .   .   .   .   .   ║(1)(1)\n'
-            ' .   O   O   .   O   .   .   .   .   .   ║(3)(3)\n'
-            ' .   .   .   .   O   .   .   O   O   .   ║(3)(3)\n'
-            ' .   .   O   .   .   .   .   .   .   .   ║(1)(1)\n'
-            ' .   .   .   .   O   .   .   .   .   .   ║(1)(1)\n'
-            ' .   .   O   .   O   .   .   .   .   .   ║(2)(2)\n'
-            ' O   .   .   .   .   .   .   .   .   O   ║(2)(2)\n'
-            ' .   .   .   .   .   .   .   .   .   .   ║(0)(0)\n'
-            ' .   .   O   O   O   O   .   O   O   O   ║(7)(7)\n'
-            '═════════════════════════════════════════\n'
-            '(1) (1) (4) (1) (6) (1) (0) (2) (2) (2) \n'
-            '(1) (1) (4) (1) (6) (1) (0) (2) (2) (2) \n'
+            "═════════════════════════════════════════\n"
+            " .   .   .   .   .   .   .   .   .   .   ║(0)(0)\n"
+            " .   .   .   .   O   .   .   .   .   .   ║(1)(1)\n"
+            " .   O   O   .   O   .   .   .   .   .   ║(3)(3)\n"
+            " .   .   .   .   O   .   .   O   O   .   ║(3)(3)\n"
+            " .   .   O   .   .   .   .   .   .   .   ║(1)(1)\n"
+            " .   .   .   .   O   .   .   .   .   .   ║(1)(1)\n"
+            " .   .   O   .   O   .   .   .   .   .   ║(2)(2)\n"
+            " O   .   .   .   .   .   .   .   .   O   ║(2)(2)\n"
+            " .   .   .   .   .   .   .   .   .   .   ║(0)(0)\n"
+            " .   .   O   O   O   O   .   O   O   O   ║(7)(7)\n"
+            "═════════════════════════════════════════\n"
+            "(1) (1) (4) (1) (6) (1) (0) (2) (2) (2) \n"
+            "(1) (1) (4) (1) (6) (1) (0) (2) (2) (2) \n"
         )
         self.assertEqual(
             bs.get_solutions(self.sample_config_file_path),
             [
                 self.parse_board(solution1),
                 self.parse_board(solution2),
-                self.parse_board(solution3)
-            ]
+                self.parse_board(solution3),
+            ],
         )
 
     def test_get_solutions_when_no_solutions(self):
         self.assertEqual(
             bs.get_solutions(
                 os.path.join(
-                    os.path.dirname(self.sample_config_file_path),
-                    'Battleships2.ini'
+                    os.path.dirname(self.sample_config_file_path), "Battleships2.ini"
                 )
             ),
-            []
+            [],
         )
