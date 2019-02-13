@@ -6,6 +6,7 @@ Before running this module please read the README file.
 from configparser import ConfigParser
 from enum import Enum
 import os
+from pathlib import Path
 from typing import (
     Any,
     Dict,
@@ -307,7 +308,14 @@ def get_redefined_fieldtypes(config: ConfigParser) -> Enum:
     return Enum("FieldType", fieldtype_mappings)
 
 
-def parse_game_data_file(input_file_path: str) -> GameData:
+def get_input_file_path(abs_or_rel_file_path: str) -> Optional[Path]:
+    if Path(abs_or_rel_file_path).exists():
+        return Path(abs_or_rel_file_path)
+    joined_path = Path(__file__).absolute().parent.parent.joinpath(abs_or_rel_file_path)
+    return joined_path if joined_path.exists() else None
+
+
+def parse_game_data_file(input_file_path: Optional[Path]) -> GameData:
     """Get data contained in the game input file.
     
     Args:
@@ -317,22 +325,32 @@ def parse_game_data_file(input_file_path: str) -> GameData:
         GameData: Parsed game data.
     
     """
-    with open(input_file_path, "r") as file:
-        subfleet_count = int(next(file).strip())
-        ship_lengths = []  # type: List[int]
-        subfleet_sizes = {}  # type: Dict[int, int]
-        for _ in range(subfleet_count):
-            ship_length, subfleet_size = (int(x) for x in next(file).strip().split())
-            ship_lengths.append(ship_length)
-            subfleet_sizes[ship_length] = subfleet_size
-        fleet = Fleet(sorted(ship_lengths, reverse=True), subfleet_sizes)
-        board_size = int(next(file).strip())
-        solution_pcs_in_rows = [int(x) for x in next(file).strip().split()]
-        solution_pcs_in_cols = [int(x) for x in next(file).strip().split()]
-        playfield = []  # type: PlayField
-        for _ in range(board_size):
-            playfield.append([FieldType(ch) for ch in next(file).strip()])
-        return GameData(playfield, solution_pcs_in_rows, solution_pcs_in_cols, fleet)
+    if input_file_path:
+        with open(input_file_path, "r") as file:
+            subfleet_count = int(next(file).strip())
+            ship_lengths = []  # type: List[int]
+            subfleet_sizes = {}  # type: Dict[int, int]
+            for _ in range(subfleet_count):
+                ship_length, subfleet_size = (
+                    int(x) for x in next(file).strip().split()
+                )
+                ship_lengths.append(ship_length)
+                subfleet_sizes[ship_length] = subfleet_size
+            fleet = Fleet(sorted(ship_lengths, reverse=True), subfleet_sizes)
+            board_size = int(next(file).strip())
+            solution_pcs_in_rows = [int(x) for x in next(file).strip().split()]
+            solution_pcs_in_cols = [int(x) for x in next(file).strip().split()]
+            playfield = []  # type: PlayField
+            for _ in range(board_size):
+                playfield.append([FieldType(ch) for ch in next(file).strip()])
+            return GameData(
+                playfield, solution_pcs_in_rows, solution_pcs_in_cols, fleet
+            )
+    else:
+        import sys
+
+        print("Invalid game input file path", file=sys.stderr)
+        sys.exit(-1)
 
 
 def get_ship_pcs_positions(board: Board) -> List[Position]:
@@ -831,7 +849,9 @@ def get_solutions(config_file_path: Optional[str] = None) -> List[Board]:
     config = parse_config(config_file_path)
     global FieldType
     FieldType = get_redefined_fieldtypes(config)  # type: ignore
-    game_data = parse_game_data_file(config["GAMEDATA"]["FILEPATH"])
+    game_data = parse_game_data_file(
+        get_input_file_path(config["GAMEDATA"]["FILEPATH"])
+    )
     board = Board.get_board_from_game_data(
         game_data.playfield,
         game_data.solution_pcs_in_rows,
