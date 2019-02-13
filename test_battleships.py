@@ -1,20 +1,22 @@
-import os
+from configparser import ConfigParser
 from pathlib import Path
 import random
 import re
 import unittest
 
-from battleships import battleships as bs
+import battleships as bs
 
 
 class BattleshipsTest(unittest.TestCase):
     def setUp(self):
         random.seed()
-        self.base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-        self.sample_config_file_path = os.path.join(
-            self.base_dir, "tests/sample_configs/Battleships1.ini"
+        self.sample_config_file_path = (
+            Path(__file__)
+            .absolute()
+            .parent.joinpath("test_data/Battleships_has_solutions.ini")
         )
-        self.sample_config = bs.parse_config(self.sample_config_file_path)
+        self.sample_config = ConfigParser()
+        self.sample_config.read(self.sample_config_file_path)
         bs.FieldType = bs.get_redefined_fieldtypes(self.sample_config)
         sample_game_data = bs.parse_game_data_file(
             self.sample_config["GAMEDATA"]["FILEPATH"]
@@ -1012,25 +1014,6 @@ class BattleshipsTest(unittest.TestCase):
             act_ships_for_ship_pcs_positions, exp_ships_for_ship_pcs_positions
         )
 
-    def test_parse_test_config(self):
-        self.assertEqual(
-            Path(self.base_dir).joinpath("tests/sample_boards/board01.txt"),
-            Path(self.sample_config["GAMEDATA"]["FILEPATH"]),
-        )
-        self.assertEqual("O", self.sample_config["FIELDTYPESYMBOLS"]["SHIP"])
-        self.assertEqual(".", self.sample_config["FIELDTYPESYMBOLS"]["SEA"])
-        self.assertEqual("x", self.sample_config["FIELDTYPESYMBOLS"]["UNKNOWN"])
-
-    def test_parse_default_config(self):
-        default_config = bs.parse_config()
-        self.assertEqual(
-            Path(self.base_dir).joinpath("tests/sample_boards/board01.txt"),
-            Path(self.sample_config["GAMEDATA"]["FILEPATH"]),
-        )
-        self.assertEqual("O", default_config["FIELDTYPESYMBOLS"]["SHIP"])
-        self.assertEqual(".", default_config["FIELDTYPESYMBOLS"]["SEA"])
-        self.assertEqual("x", default_config["FIELDTYPESYMBOLS"]["UNKNOWN"])
-
     def test_get_solutions_when_has_solutions(self):
         solution1 = (
             "═════════════════════════════════════════\n"
@@ -1080,8 +1063,9 @@ class BattleshipsTest(unittest.TestCase):
             "(1) (1) (4) (1) (6) (1) (0) (2) (2) (2) \n"
             "(1) (1) (4) (1) (6) (1) (0) (2) (2) (2) \n"
         )
+        bs.CONFIG_FILE_PATH = self.sample_config_file_path
         self.assertEqual(
-            bs.get_solutions(self.sample_config_file_path),
+            bs.get_solutions(),
             [
                 self.parse_board(solution1),
                 self.parse_board(solution2),
@@ -1090,11 +1074,9 @@ class BattleshipsTest(unittest.TestCase):
         )
 
     def test_get_solutions_when_no_solutions(self):
-        self.assertEqual(
-            bs.get_solutions(
-                os.path.join(
-                    os.path.dirname(self.sample_config_file_path), "Battleships2.ini"
-                )
-            ),
-            [],
+        bs.CONFIG_FILE_PATH = (
+            Path(__file__)
+            .absolute()
+            .parent.joinpath("test_data/Battleships_has_no_solutions.ini")
         )
+        self.assertEqual(bs.get_solutions(), [])

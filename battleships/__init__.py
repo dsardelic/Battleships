@@ -1,1 +1,0 @@
-"""Battleships puzzle solver."""

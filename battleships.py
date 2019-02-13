@@ -5,7 +5,6 @@ Before running this module please read the README file.
 
 from configparser import ConfigParser
 from enum import Enum
-import os
 from pathlib import Path
 from typing import (
     Any,
@@ -21,6 +20,7 @@ from typing import (
     cast,
 )
 
+CONFIG_FILE_PATH = Path(__file__).absolute().parent.joinpath("Battleships.ini")
 
 Position = Tuple[int, int]
 """Field coordinates"""
@@ -268,27 +268,6 @@ class Board:
             self.total_pcs_in_rows,
             self.total_pcs_in_cols,
         )
-
-
-def parse_config(config_file_path: Optional[str] = None) -> ConfigParser:
-    """Parse the input config file and return a config object.
-    
-    Args:
-        config_file_path (str): Configuration file path. Defaults to
-            None, in which case the package default INI file is used.
-    
-    Returns:
-        ConfigParser: Configuration object parsed from the input file.
-    
-    """
-    if not config_file_path:
-        config_file_path = os.path.join(
-            os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
-            "Battleships.ini",
-        )
-    config = ConfigParser()
-    config.read(config_file_path)
-    return config
 
 
 def get_redefined_fieldtypes(config: ConfigParser) -> Enum:
@@ -833,20 +812,16 @@ def get_solutions_for_mappings(
     return solutions
 
 
-def get_solutions(config_file_path: Optional[str] = None) -> List[Board]:
+def get_solutions() -> List[Board]:
     """Return a list of solutions for input parameters from the file at
     path game_data_file_path.
-    
-    Args:
-        config_file_path (str): Path of the file containing board and
-            fleet data. Defaults to None, in which case the package
-            default configuration file is used.
     
     Returns:
         List[Board]: List of found solution boards.
     
     """
-    config = parse_config(config_file_path)
+    config = ConfigParser()
+    config.read(CONFIG_FILE_PATH)
     global FieldType
     FieldType = get_redefined_fieldtypes(config)  # type: ignore
     game_data = parse_game_data_file(
