@@ -10,7 +10,7 @@ Battleships is a program for solving the popular [Battleship](https://en.wikiped
 
 The [INI file](Battleships.ini) specifies the following:
 
-* Path to the input data file
+* Path to the input data file (absolute or relative with regard to the [battleships](battleships.py) module)
 * Symbols used for marking a specific field type: sea, ship or unknown (i.e. undetermined).
 
 While the values' symbols are arbitrary, the keys' names must be SHIP, SEA and UNKNOWN. These are also the only currently used and recognized field types.
@@ -28,14 +28,14 @@ The input data file is a text file with the following structure:
 
 ### How to run the program?
 
-Battleships is a Python (3.5) program. After configuring the [INI file](Battleships.ini), just run the [battleships](battleships/battleships.py) module. The solutions are printed to standard output.
+Battleships is a Python3 program. After configuring the [INI file](Battleships.ini), just run the [battleships](battleships.py) module. The solutions are printed to standard output.
 
 ## Can it be optimized?
 
 Sure, in a number of ways, for instance by:
 
 * Developing a GUI to collect input data and display solutions.
-* Implementing input data validation.
+* Implementing input data format validation.
 * Implementing additional field type handling, e.g. for fields representing a ship of length 1, a ship's bow or stern (including ship's orientation on the board) or an unspecified ship part.
 * etc.
 

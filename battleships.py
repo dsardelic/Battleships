@@ -6,6 +6,7 @@ Before running this module please read the README file.
 from configparser import ConfigParser
 from enum import Enum
 from pathlib import Path
+import sys
 from typing import (
     Any,
     Dict,
@@ -287,10 +288,25 @@ def get_redefined_fieldtypes(config: ConfigParser) -> Enum:
     return Enum("FieldType", fieldtype_mappings)
 
 
-def get_input_file_path(abs_or_rel_file_path: str) -> Optional[Path]:
-    if Path(abs_or_rel_file_path).exists():
-        return Path(abs_or_rel_file_path)
-    joined_path = Path(__file__).absolute().parent.parent.joinpath(abs_or_rel_file_path)
+def get_absolute_path(abs_or_rel_path: str) -> Optional[Path]:
+    """Return the absolute path from corresponding input path which may
+    be either absolute or relative.
+    
+    First checks is the path itself is absolute. If not, checks whether
+    the path created by joining the absolute path of the module's
+    folder and the input path is an existing one.
+    
+    Args:
+        abs_or_rel_path (str): Absolute or relative path.
+    
+    Returns:
+        Optional[Path]: Resolved absolute path. If the path could not
+            be resolved, returns None.
+    """
+    path = Path(abs_or_rel_path)
+    if path.is_absolute():
+        return path if path.exists() else None
+    joined_path = Path(__file__).absolute().parent.joinpath(abs_or_rel_path)
     return joined_path if joined_path.exists() else None
 
 
@@ -298,7 +314,9 @@ def parse_game_data_file(input_file_path: Optional[Path]) -> GameData:
     """Get data contained in the game input file.
     
     Args:
-        input_file_path (str): Game input file path.
+        input_file_path (str): Game input file path. Returned by the
+            get_absolute_path method, the path is either valid and
+            existing or None.
     
     Returns:
         GameData: Parsed game data.
@@ -326,8 +344,6 @@ def parse_game_data_file(input_file_path: Optional[Path]) -> GameData:
                 playfield, solution_pcs_in_rows, solution_pcs_in_cols, fleet
             )
     else:
-        import sys
-
         print("Invalid game input file path", file=sys.stderr)
         sys.exit(-1)
 
@@ -825,7 +841,7 @@ def get_solutions() -> List[Board]:
     global FieldType
     FieldType = get_redefined_fieldtypes(config)  # type: ignore
     game_data = parse_game_data_file(
-        get_input_file_path(config["GAMEDATA"]["FILEPATH"])
+        get_absolute_path(config["GAMEDATA"]["FILEPATH"])
     )
     board = Board.get_board_from_game_data(
         game_data.playfield,

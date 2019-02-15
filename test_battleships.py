@@ -2,12 +2,12 @@ from configparser import ConfigParser
 from pathlib import Path
 import random
 import re
-import unittest
+from unittest import TestCase, mock
 
 import battleships as bs
 
 
-class BattleshipsTest(unittest.TestCase):
+class BattleshipsTest(TestCase):
     def setUp(self):
         random.seed()
         self.sample_config_file_path = (
@@ -83,13 +83,13 @@ class BattleshipsTest(unittest.TestCase):
         self.assertEqual(board.playfield, playfield)
         self.assertEqual(board.rem_pcs_in_rows, rem_pcs_in_rows)
         self.assertEqual(board.rem_pcs_in_cols, rem_pcs_in_cols)
-        self.assertEqual(board.playfield is playfield, False)
-        self.assertEqual(board.rem_pcs_in_rows is rem_pcs_in_rows, False)
-        self.assertEqual(board.rem_pcs_in_cols is rem_pcs_in_cols, False)
+        self.assertFalse(board.playfield is playfield)
+        self.assertFalse(board.rem_pcs_in_rows is rem_pcs_in_rows)
+        self.assertFalse(board.rem_pcs_in_cols is rem_pcs_in_cols)
         self.assertEqual(board.total_pcs_in_rows, rem_pcs_in_rows)
         self.assertEqual(board.total_pcs_in_cols, rem_pcs_in_cols)
-        self.assertEqual(board.total_pcs_in_rows is rem_pcs_in_rows, False)
-        self.assertEqual(board.total_pcs_in_cols is rem_pcs_in_cols, False)
+        self.assertFalse(board.total_pcs_in_rows is rem_pcs_in_rows)
+        self.assertFalse(board.total_pcs_in_cols is rem_pcs_in_cols)
 
         total_pcs_in_rows = [x + random.randrange(5) for x in rem_pcs_in_rows]
         total_pcs_in_cols = [x + random.randrange(5) for x in rem_pcs_in_cols]
@@ -102,8 +102,8 @@ class BattleshipsTest(unittest.TestCase):
         )
         self.assertEqual(board.total_pcs_in_rows, total_pcs_in_rows)
         self.assertEqual(board.total_pcs_in_cols, total_pcs_in_cols)
-        self.assertEqual(board.total_pcs_in_rows is total_pcs_in_rows, False)
-        self.assertEqual(board.total_pcs_in_cols is total_pcs_in_cols, False)
+        self.assertFalse(board.total_pcs_in_rows is total_pcs_in_rows)
+        self.assertFalse(board.total_pcs_in_cols is total_pcs_in_cols)
 
     def test_board_repr(self):
         exp_repr = (
@@ -158,29 +158,31 @@ class BattleshipsTest(unittest.TestCase):
             [0, 0, 1, 3, 3, 1, 1, 2, 2, 0, 7, 0],
             [0, 1, 1, 4, 1, 6, 1, 0, 2, 2, 2, 0],
         )
-        self.assertEqual(self.sample_exp_board.__eq__(board), True)
-        self.assertEqual(self.sample_exp_board is board, False)
+        self.assertTrue(self.sample_exp_board.__eq__(board))
+        self.assertFalse(self.sample_exp_board is board)
 
         board.playfield[1][1] = bs.FieldType.SEA
-        self.assertEqual(self.sample_exp_board.__eq__(board), False)
+        self.assertFalse(self.sample_exp_board.__eq__(board))
+
+        self.assertFalse(self.sample_exp_board.__eq__("board"))
 
     def test_board_get_copy(self):
         board = self.sample_exp_board.get_copy()
         self.assertEqual(self.sample_exp_board, board)
-        self.assertEqual(self.sample_exp_board is board, False)
+        self.assertFalse(self.sample_exp_board is board)
 
     def test_fleet_eq(self):
         fleet = bs.Fleet([4, 3, 2, 1], {4: 1, 3: 2, 2: 3, 1: 4})
-        self.assertEqual(self.sample_exp_fleet.__eq__(fleet), True)
-        self.assertEqual(self.sample_exp_fleet is fleet, False)
+        self.assertTrue(self.sample_exp_fleet.__eq__(fleet))
+        self.assertFalse(self.sample_exp_fleet is fleet)
 
         fleet.ship_lengths[0] = 5
-        self.assertEqual(self.sample_exp_fleet.__eq__(fleet), False)
+        self.assertFalse(self.sample_exp_fleet.__eq__(fleet))
 
     def test_fleet_get_copy(self):
         fleet = self.sample_exp_fleet.get_copy()
         self.assertEqual(self.sample_exp_fleet, fleet)
-        self.assertEqual(self.sample_exp_fleet is fleet, False)
+        self.assertFalse(self.sample_exp_fleet is fleet)
 
     def test_get_redefined_fieldtypes(self):
         FieldType = bs.get_redefined_fieldtypes(self.sample_config)
@@ -188,7 +190,33 @@ class BattleshipsTest(unittest.TestCase):
         self.assertEqual(FieldType.SHIP.value, "O")
         self.assertEqual(FieldType.UNKNOWN.value, "x")
 
-    def test_parse_game_data_file(self):
+    @mock.patch.object(bs.Path, "is_absolute")
+    @mock.patch.object(bs.Path, "absolute")
+    @mock.patch.object(bs.Path, "exists")
+    def test_get_absolute_path(
+        self, mock_path_exists, mock_path_absolute, mock_path_is_absolute
+    ):
+        abs_path = "/home/user/file.in"
+        path = Path(abs_path)
+        mock_path_is_absolute.return_value = True
+        mock_path_exists.return_value = True
+        self.assertEqual(bs.get_absolute_path(abs_path), path)
+        mock_path_is_absolute.return_value = True
+        mock_path_exists.return_value = False
+        self.assertIsNone(bs.get_absolute_path(abs_path))
+        mock_path_is_absolute.return_value = False
+        rel_path = "rel_path/file.in"
+        mock_path_absolute.return_value = Path("/Battleships/battleships.py")
+        mock_path_exists.return_value = True
+        self.assertEqual(
+            bs.get_absolute_path(rel_path), Path("/Battleships/rel_path/file.in")
+        )
+        mock_path_exists.return_value = False
+        self.assertIsNone(bs.get_absolute_path(rel_path))
+
+    @mock.patch("battleships.print")
+    @mock.patch("battleships.sys")
+    def test_parse_game_data_file(self, mocked_sys, mocked_print):
         exp_playfield = [[bs.FieldType.UNKNOWN] * 10 for _ in range(10)]
         exp_playfield[4][2] = bs.FieldType.SHIP
         exp_playfield[7][2] = bs.FieldType.SEA
@@ -202,6 +230,14 @@ class BattleshipsTest(unittest.TestCase):
         self.assertEqual(
             game_data.fleet, bs.Fleet([4, 3, 2, 1], {4: 1, 3: 2, 2: 3, 1: 4})
         )
+        input_file_path = None
+        bs.parse_game_data_file(input_file_path)
+        mocked_print.assert_called_once()
+        mocked_print.assert_called_with(
+            "Invalid game input file path", file=mocked_sys.stderr
+        )
+        mocked_sys.exit.assert_called_once()
+        mocked_sys.exit.assert_called_with(-1)
 
     def test_get_board_from_input_data(self):
         playfield = [[bs.FieldType.UNKNOWN] * 10 for _ in range(10)]
@@ -447,7 +483,7 @@ class BattleshipsTest(unittest.TestCase):
         bs.mark_uncovered_sea_positions(self.sample_exp_board, ship_pcs_positions)
         act_board = self.sample_exp_board.get_copy()
         act_fleet = self.sample_exp_fleet.get_copy()
-        self.assertEqual(
+        self.assertTrue(
             bs.mark_ships(
                 act_board,
                 act_fleet,
@@ -456,8 +492,7 @@ class BattleshipsTest(unittest.TestCase):
                     bs.Ship(2, 10, 1, bs.Direction.RIGHT),
                     bs.Ship(3, 3, 3, bs.Direction.DOWN),
                 ],
-            ),
-            True,
+            )
         )
         exp_board_repr = (
             "═════════════════════════════════════════\n"
@@ -483,7 +518,7 @@ class BattleshipsTest(unittest.TestCase):
         for x, y in ship_pcs_positions:
             self.sample_exp_board.playfield[x][y] = bs.FieldType.UNKNOWN
         bs.mark_uncovered_sea_positions(self.sample_exp_board, ship_pcs_positions)
-        self.assertEqual(
+        self.assertFalse(
             bs.mark_ships(
                 self.sample_exp_board,
                 self.sample_exp_fleet,
@@ -492,8 +527,7 @@ class BattleshipsTest(unittest.TestCase):
                     bs.Ship(2, 10, 1, bs.Direction.RIGHT),
                     bs.Ship(2, 3, 3, bs.Direction.DOWN),
                 ],
-            ),
-            False,
+            )
         )
 
     def test_mark_ships_fails_when_ship_pcs_touch(self):
@@ -501,7 +535,7 @@ class BattleshipsTest(unittest.TestCase):
         for x, y in ship_pcs_positions:
             self.sample_exp_board.playfield[x][y] = bs.FieldType.UNKNOWN
         bs.mark_uncovered_sea_positions(self.sample_exp_board, ship_pcs_positions)
-        self.assertEqual(
+        self.assertFalse(
             bs.mark_ships(
                 self.sample_exp_board,
                 self.sample_exp_fleet,
@@ -510,8 +544,7 @@ class BattleshipsTest(unittest.TestCase):
                     bs.Ship(2, 10, 1, bs.Direction.RIGHT),
                     bs.Ship(2, 3, 3, bs.Direction.DOWN),
                 ],
-            ),
-            False,
+            )
         )
 
     def test_get_ships_for_ship_piece_position(self):
