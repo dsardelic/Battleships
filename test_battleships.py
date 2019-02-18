@@ -1113,3 +1113,80 @@ class BattleshipsTest(TestCase):
             .parent.joinpath("test_data/Battleships_has_no_solutions.ini")
         )
         self.assertEqual(bs.get_solutions(), [])
+
+    @mock.patch("battleships.print")
+    def test_main_has_solutions(self, mock_print):
+        bs.CONFIG_FILE_PATH = self.sample_config_file_path
+        solution1 = (
+            "═════════════════════════════════════════\n"
+            " .   .   .   .   .   .   .   .   .   .   ║(0)\n"
+            " .   .   .   .   O   .   .   .   .   .   ║(1)\n"
+            " .   .   O   .   O   .   .   O   .   .   ║(3)\n"
+            " .   .   O   .   O   .   .   .   .   O   ║(3)\n"
+            " .   .   O   .   .   .   .   .   .   .   ║(1)\n"
+            " .   .   .   .   O   .   .   .   .   .   ║(1)\n"
+            " .   O   .   .   O   .   .   .   .   .   ║(2)\n"
+            " .   .   .   .   .   .   .   .   O   O   ║(2)\n"
+            " .   .   .   .   .   .   .   .   .   .   ║(0)\n"
+            " O   .   O   O   O   O   .   O   O   .   ║(7)\n"
+            "═════════════════════════════════════════\n"
+            "(1) (1) (4) (1) (6) (1) (0) (2) (2) (2) \n"
+        )
+        solution2 = (
+            "═════════════════════════════════════════\n"
+            " .   .   .   .   .   .   .   .   .   .   ║(0)\n"
+            " .   .   .   .   O   .   .   .   .   .   ║(1)\n"
+            " .   .   O   .   O   .   .   .   .   O   ║(3)\n"
+            " .   .   O   .   O   .   .   O   .   .   ║(3)\n"
+            " .   .   O   .   .   .   .   .   .   .   ║(1)\n"
+            " .   .   .   .   O   .   .   .   .   .   ║(1)\n"
+            " .   O   .   .   O   .   .   .   .   .   ║(2)\n"
+            " .   .   .   .   .   .   .   .   O   O   ║(2)\n"
+            " .   .   .   .   .   .   .   .   .   .   ║(0)\n"
+            " O   .   O   O   O   O   .   O   O   .   ║(7)\n"
+            "═════════════════════════════════════════\n"
+            "(1) (1) (4) (1) (6) (1) (0) (2) (2) (2) \n"
+        )
+        solution3 = (
+            "═════════════════════════════════════════\n"
+            " .   .   .   .   .   .   .   .   .   .   ║(0)\n"
+            " .   .   .   .   O   .   .   .   .   .   ║(1)\n"
+            " .   O   O   .   O   .   .   .   .   .   ║(3)\n"
+            " .   .   .   .   O   .   .   O   O   .   ║(3)\n"
+            " .   .   O   .   .   .   .   .   .   .   ║(1)\n"
+            " .   .   .   .   O   .   .   .   .   .   ║(1)\n"
+            " .   .   O   .   O   .   .   .   .   .   ║(2)\n"
+            " O   .   .   .   .   .   .   .   .   O   ║(2)\n"
+            " .   .   .   .   .   .   .   .   .   .   ║(0)\n"
+            " .   .   O   O   O   O   .   O   O   O   ║(7)\n"
+            "═════════════════════════════════════════\n"
+            "(1) (1) (4) (1) (6) (1) (0) (2) (2) (2) \n"
+        )
+        total = "3 solutions in total."
+        self.assertEqual(bs.main(), 0)
+        self.assertEqual(
+            mock_print.mock_calls,
+            [
+                mock.call(solution1),
+                mock.call(solution2),
+                mock.call(solution3),
+                mock.call(total),
+            ],
+        )
+
+    @mock.patch("battleships.print")
+    def test_main_has_no_solutions(self, mock_print):
+        bs.CONFIG_FILE_PATH = (
+            Path(__file__)
+            .absolute()
+            .parent.joinpath("test_data/Battleships_has_no_solutions.ini")
+        )
+        self.assertEqual(bs.main(), 0)
+        self.assertEqual(mock_print.mock_calls, [mock.call("No solutions found.")])
+
+    @mock.patch.object(bs, "main")
+    @mock.patch.object(bs.sys, "exit")
+    def test_init(self, mock_sys_exit, mock_main):
+        with mock.patch.object(bs, "__name__", "__main__"):
+            bs.init()
+            mock_sys_exit.assert_called_once_with(mock_main())

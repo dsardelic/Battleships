@@ -5,6 +5,7 @@ Before running this module please read the README file.
 
 from configparser import ConfigParser
 from enum import Enum
+from itertools import combinations, product
 from pathlib import Path
 import sys
 from typing import (
@@ -20,6 +21,7 @@ from typing import (
     Union,
     cast,
 )
+
 
 CONFIG_FILE_PATH = Path(__file__).absolute().parent.joinpath("Battleships.ini")
 
@@ -302,6 +304,7 @@ def get_absolute_path(abs_or_rel_path: str) -> Optional[Path]:
     Returns:
         Optional[Path]: Resolved absolute path. If the path could not
             be resolved, returns None.
+    
     """
     path = Path(abs_or_rel_path)
     if path.is_absolute():
@@ -754,9 +757,7 @@ def find_solutions_for_subfleet(
                 else:
                     solutions.append(new_board)
         else:
-            import itertools
-
-            for ship_combination in itertools.combinations(ships, subfleet_size):
+            for ship_combination in combinations(ships, subfleet_size):
                 new_board, new_fleet = board.get_copy(), fleet.get_copy()
                 if mark_ships(new_board, new_fleet, ship_combination):
                     if subfleet_index + 1 < len(fleet.ship_lengths):
@@ -818,8 +819,6 @@ def get_solutions_for_mappings(
     if not fields_ships_mappings:
         find_solutions_for_subfleet(board, fleet, 0, solutions)
     else:
-        from itertools import product
-
         for ship_combination in product(*fields_ships_mappings.values()):
             if not ship_combination_exceeds_fleet(fleet, set(ship_combination)):
                 new_board, new_fleet = board.get_copy(), fleet.get_copy()
@@ -840,9 +839,7 @@ def get_solutions() -> List[Board]:
     config.read(CONFIG_FILE_PATH)
     global FieldType
     FieldType = get_redefined_fieldtypes(config)  # type: ignore
-    game_data = parse_game_data_file(
-        get_absolute_path(config["GAMEDATA"]["FILEPATH"])
-    )
+    game_data = parse_game_data_file(get_absolute_path(config["GAMEDATA"]["FILEPATH"]))
     board = Board.get_board_from_game_data(
         game_data.playfield,
         game_data.solution_pcs_in_rows,
@@ -861,11 +858,25 @@ def get_solutions() -> List[Board]:
     return get_solutions_for_mappings(board, game_data.fleet, fields_ships_mappings)
 
 
-if __name__ == "__main__":
+def main():
+    """Calculate and print solutions."""
     solutions = get_solutions()
-    for solution in solutions:
-        print(solution.repr(True))
     if solutions:
+        for solution in solutions:
+            print(solution.repr(True))
         print("{} solutions in total.".format(len(solutions)))
     else:
         print("No solutions found.")
+    return 0
+
+
+def init():
+    """Run the module.
+    
+    A simple wrapper around main(), for automated testing purposes.
+    """
+    if __name__ == "__main__":
+        sys.exit(main())
+
+
+init()
