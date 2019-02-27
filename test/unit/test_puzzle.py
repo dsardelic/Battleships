@@ -833,6 +833,6 @@ class TestPuzzle(unittest.TestCase):
             .resolve()
             .parent.joinpath("test/sample_files/Battleships01.out"),
             "r",
-            encoding="utf-8"
+            encoding="utf-8",
         ) as expected_ofile:
             self.assertEqual(actual_ofile.getvalue(), expected_ofile.read())
