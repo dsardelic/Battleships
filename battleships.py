@@ -11,19 +11,21 @@ import sys
 from typing import (
     Any,
     Dict,
+    Iterable,
     List,
     NamedTuple,
     Optional,
-    Set,
     Tuple,
     Type,
     TypeVar,
-    Union,
     cast,
 )
 
 
 CONFIG_FILE_PATH = Path(__file__).absolute().parent.joinpath("Battleships.ini")
+
+EXIT_SUCCESS = 0
+EXIT_FAILURE = 1
 
 Position = Tuple[int, int]
 """Field coordinates"""
@@ -348,7 +350,7 @@ def parse_game_data_file(input_file_path: Optional[Path]) -> GameData:
             )
     else:
         print("Invalid game input file path", file=sys.stderr)
-        sys.exit(-1)
+        sys.exit(EXIT_FAILURE)
 
 
 def get_ship_pcs_positions(board: Board) -> List[Position]:
@@ -531,9 +533,7 @@ def mark_ship(board: Board, ship: Ship) -> None:
         board.playfield[ship.row + ship.length][ship.col] = FieldType.SEA
 
 
-def mark_ships(
-    board: Board, fleet: Fleet, ships: Union[List[Ship], Set[Ship], Tuple[Ship, ...]]
-) -> bool:
+def mark_ships(board: Board, fleet: Fleet, ships: Iterable[Ship]) -> bool:
     """Check whether each ship in ships, one after another, can be
     placed onto the board.
     
@@ -544,8 +544,7 @@ def mark_ships(
         board (Board): The board onto which to mark the ships.
         fleet (Fleet): The fleet of ships remaining to be marked onto
             board.
-        ships (Union[List[Ship], Set[Ship], Tuple[Ship, ...]]): The
-            ships to mark onto the board.
+        ships (Iterable[Ship]): The ships to mark onto the board.
     
     Returns:
         True if all ships can be marked, False otherwise.
@@ -792,15 +791,14 @@ def get_solutions_for_mappings(
     """
 
     def ship_combination_exceeds_fleet(
-        fleet: Fleet, ship_combination: Union[List[Ship], Set[Ship]]
+        fleet: Fleet, ship_combination: Iterable[Ship]
     ) -> bool:
         """For each ship type in ship_combination checks if there are
         more ships in the ship_combination than in the fleet.
         
         Args:
             fleet (Fleet): Fleet against which to check number of ships.
-            ship_combination (Union[List[Ship], Set[Ship]]): Group of
-                ships.
+            ship_combination (Iterable[Ship]): Group of ships.
         
         Returns:
             True if exceeds, False otherwise.
@@ -867,7 +865,7 @@ def main():
         print("{} solutions in total.".format(len(solutions)))
     else:
         print("No solutions found.")
-    return 0
+    return EXIT_SUCCESS
 
 
 def init():

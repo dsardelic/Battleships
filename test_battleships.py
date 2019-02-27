@@ -236,8 +236,7 @@ class BattleshipsTest(TestCase):
         mocked_print.assert_called_with(
             "Invalid game input file path", file=mocked_sys.stderr
         )
-        mocked_sys.exit.assert_called_once()
-        mocked_sys.exit.assert_called_with(-1)
+        mocked_sys.exit.assert_called_once_with(bs.EXIT_FAILURE)
 
     def test_get_board_from_input_data(self):
         playfield = [[bs.FieldType.UNKNOWN] * 10 for _ in range(10)]
@@ -1181,7 +1180,7 @@ class BattleshipsTest(TestCase):
             .absolute()
             .parent.joinpath("test_data/Battleships_has_no_solutions.ini")
         )
-        self.assertEqual(bs.main(), 0)
+        self.assertEqual(bs.main(), bs.EXIT_SUCCESS)
         self.assertEqual(mock_print.mock_calls, [mock.call("No solutions found.")])
 
     @mock.patch.object(bs, "main")
