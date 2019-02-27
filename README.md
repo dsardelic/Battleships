@@ -6,29 +6,42 @@ Battleships is a program for solving the popular [Battleship](https://en.wikiped
 
 ## How does it work?
 
-### INI file
+### Params module
 
-The [INI file](Battleships.ini) specifies the following:
+The [params](params.py) module specifies the following:
 
-* Path to the input data file (absolute or relative with regard to the [battleships](battleships.py) module)
-* Symbols used for marking a specific field type: sea, ship or unknown (i.e. undetermined).
-
-While the values' symbols are arbitrary, the keys' names must be SHIP, SEA and UNKNOWN. These are also the only currently used and recognized field types.
+* OS exit code in case of unsuccessful program termination. (e.g. 1)
+* Symbols used for marking a specific field type: sea, ship or unknown/undetermined (e.g. ".", "O", and "x").
+* Input and output file name (e.g. "Battleships.in" and "Battleships.out") and path. The default input and output file folder is the same folder where the [params](params.py) module is located (e.g. project root path).
+* Output message strings (single language only, no internationalization supported).
 
 ### Input data file
 
-The input data file is a text file with the following structure:
+The input data file is a text file with structure as follows.
 
-* Row 1 - Number (SHIP_TYPES) of used ship types, equivalent to count of distinct ship lengths.
-* Rows 2 through (1 + SHIP_TYPES) - Two whitespace-separated numbers representing ship length/type and corresponding ship count respectively.
-* Row (2 + SHIP_TYPES) - Board playfield size (BOARD_SIZE). The program currently handles square boards only.
-* Row (3 + SHIP_TYPES) - BOARD_SIZE whitespace-separated numbers representing total number of ship pieces in each of the BOARD_SIZE board rows respectively.
-* Row (4 + SHIP_TYPES) - BOARD_SIZE whitespace-separated numbers representing total number of ship pieces in each of the BOARD_SIZE board columns respectively.
-* Rows (5 + SHIP_TYPES) through (4 + SHIP_TYPES + BOARD_SIZE) - String of BOARD_SIZE characters representing a field type in a particular board row and column. Each used character must be linked to the corresponding field type in the [INI file](Battleships.ini).
+The first row contains the number of ship types, equivalent to the number of distinct ship lengths. The following _n_ lines contain two single-whitespace-separated numbers representing ship length/type and corresponding number of ships respectively.
+
+The following row contains the board size. The program currently supports square boards only. The following 2 lines contain _m_ single-whitespace-separated numbers that represent the total number of ship pieces in each of the _m_ board rows and columns respectively.
+
+The final _m_ rows contain strings of _m_ characters where each character represents the field type (as defined in the [params](params.py) module) in the corresponding row and column.
 
 ### How to run the program?
 
-Battleships is a Python3 program. After setting the input data file location (and, if necessary, the field type symbols) in the [INI file](Battleships.ini), just run the [battleships](battleships.py) module. Solutions are printed to standard output.
+Battleships requires Python 3.7 or higher. After configuring the data in the the [params](params.py) module, just run the battleships package (e.g. python3 -m battleships).
+
+### Program output
+
+Program output is written to the output file whose name and path are specified in the [params](params.py) module.
+
+### Algorithm
+
+Basically, solving the puzzle comes down to solving each branch which results from solving two problems:
+
+1. There is a set of board positions which are currently not, but need to be, occupied by ship fields, i.e. each of these positions needs to be covered by a ship. The goal is to find all possible sets of remaining ships of any size that would successfully cover the entire set of positions.
+
+1. There is a group of _x_ ships of the same size (i.e. subfleet _x_) that all need to be marked somewhere on the board at the same time. The goal is to find all possible board "slots" in which a ship of size _x_ might be marked, and then for each combination of _x_ slots try to mark the ships into the slots.
+
+Problem 1 has higher priority than problem 2. If problem 1 is not applicable, then problem 2 is solved. If problem 2 is also not applicable, then a solution - the actual layout of ships on the board - has been found.    
 
 ## Can it be optimized?
 
