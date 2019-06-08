@@ -27,21 +27,25 @@ The final _m_ rows contain strings of _m_ characters where each character repres
 
 ### How to run the program?
 
-Battleships requires Python 3.7 or higher. After configuring the data in the the [params](params.py) module, just run the battleships package (e.g. python3 -m battleships).
+Battleships requires Python 3.7 or higher. After configuring the [params](params.py) module, just run the battleships package (e.g. `python3 -m battleships`).
+
+### How to test the program?
+
+The unittest test code (unit and integration tests) and test fixtures are located in the [test](test) folder. To execute all tests, just run `python3 -m unittest`. **Warning:** Since the [params](params.py) module is considered a part of the program, before running the tests make sure that the module content is exactly as it is in this code repository!
 
 ### Program output
 
-Program output is written to the output file whose name and path are specified in the [params](params.py) module.
+Program output is written to the output file whose name and path are specified in the [params](params.py) module. The output consists of a list of solutions followed by a message containing the number of found solutions.
 
 ### Algorithm
 
-Basically, solving the puzzle comes down to solving each branch which results from solving two problems:
+Basically, solving the puzzle comes down to solving each branch resulting from solving two problems:
 
-1. There is a set of board positions which are currently not, but need to be, occupied by ship fields, i.e. each of these positions needs to be covered by a ship. The goal is to find all possible sets of remaining ships of any size that would successfully cover the entire set of positions.
+1. There is a set of board positions which are currently not - but need to be - occupied by ship fields, i.e. each of these positions needs to be covered by a ship. The goal is to find all possible sets of remaining ships (i.e. ship remaining to be marked onto the board at that particular point in solving the puzzle), of any size, that would successfully cover the entire set of positions.
 
-1. There is a group of _x_ ships of the same size (i.e. subfleet _x_) that all need to be marked somewhere on the board at the same time. The goal is to find all possible board "slots" in which a ship of size _x_ might be marked, and then for each combination of _x_ slots try to mark the ships into the slots.
+1. There is a group of _x_ ships of the same size (i.e. subfleet _x_) that needs to be marked - all ships at once - onto the board. The goal is to find all possible board "slots" in which a ship of size _x_ might be marked, and then for each _x_ slot-combination try to mark the ships into those slots.
 
-Problem 1 has higher priority than problem 2. If problem 1 is not applicable, then problem 2 is solved. If problem 2 is also not applicable, then a solution - the actual layout of ships on the board - has been found.    
+Problem 1 has higher priority than problem 2. If problem 1 is not applicable, then problem 2 is solved. If problem 2 is also not applicable, then a solution - the current layout of ships on the board - has been found.    
 
 ## Can it be optimized?
 
@@ -49,12 +53,12 @@ Sure, in a number of ways, for instance by:
 
 * Developing a GUI to collect input data and display solutions.
 * Implementing input data format validation.
-* Implementing additional field type handling, e.g. for fields representing a ship of length 1, a ship's bow or stern (including ship's orientation on the board) or an unspecified ship part.
+* Implementing additional field types e.g. for fields representing a ship of length 1, a ship's bow or stern (including ship's orientation on the board) or an unspecified ship part.
 * etc.
 
 ## May I use this program?
 
-This program is licensed under the MIT license which can be found in a [separate file](LICENSE).
+This program is licensed under the MIT license which can be found in a separate [license file](LICENSE).
 
 ## How can I contact the author?
 
