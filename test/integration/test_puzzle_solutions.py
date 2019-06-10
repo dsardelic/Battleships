@@ -20,7 +20,9 @@ class IntegrationTests(unittest.TestCase):
                 )
                 battleships.puzzle.Puzzle.solutions = []
                 puzzle.solve()
-                with open(fixture_base_path.joinpath(f"{fixture}.out")) as out_file:
+                with open(
+                    fixture_base_path.joinpath(f"{fixture}.out"), "r", encoding="utf-8"
+                ) as out_file:
                     out_file_content = out_file.read()
                 solution_regex = r"╔═+╗\n(?:║(?:\s+[Ox.])+\s+║\n)+╚═+╝"
                 self.assertEqual(
