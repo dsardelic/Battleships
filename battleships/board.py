@@ -40,10 +40,10 @@ class Board:
         Args:
             grid (battleships.grid.FieldTypeGrid): Grid of FieldType
                 elements.
-            number_of_ship_fields_to_mark_in_series (Dict[
-                battleships.grid.Series, List[int]]): For each Series
-                type indicates how many ship fields remain to be marked
-                in the corresponding series.
+            number_of_ship_fields_to_mark_in_series
+                (Dict[battleships.grid.Series, List[int]]):
+                For each Series type indicates how many ship fields
+                remain to be marked in the corresponding series.
         """
         self.grid = grid
         self.number_of_ship_fields_to_mark_in_series = (
@@ -65,6 +65,8 @@ class Board:
         Args:
             other: The object to compare with self.
         
+        Returns:
+            bool: True if objects are equal, False otherwise.
         """
         if isinstance(other, self.__class__):
             return (
@@ -249,10 +251,9 @@ class Board:
         """
         for series in Series:
             for series_index in range(1, self.size - 1):
-                if (
-                    self.number_of_ship_fields_to_mark_in_series[series][series_index]
-                    == 0
-                ):
+                if not self.number_of_ship_fields_to_mark_in_series[series][
+                    series_index
+                ]:
                     self.grid.replace_fields_in_series(
                         FieldType.UNKNOWN, FieldType.SEA, series, series_index
                     )

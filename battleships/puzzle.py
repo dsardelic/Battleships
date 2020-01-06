@@ -227,7 +227,7 @@ class Puzzle:
                     coverings[ship].add(position)
             return coverings
 
-        def find_puzzles(
+        def find_puzzles(  # pylint: disable=W9015
             ship_group: Set[Ship],
             covered_positions: Set[Position],
             positions_to_cover: List[Position],
@@ -247,11 +247,12 @@ class Puzzle:
                     of positions covered by ships in ship_group.
                 positions_to_cover (List[battleships.grid.Position]):
                     Positions remaining to be covered by ships.
-                available_coverings (Dict[battleships.ship.Ship, Set[
-                    battleships.grid.Position]]): Mapping of remaining
-                    ships and sets of positions that each ship covers.
-                    Does not contain any of the ships in ship_group. The
-                    sets of ships do not contain any of the positions in
+                available_coverings(Dict[
+                    battleships.ship.Ship, Set[battleships.grid.Position
+                    ]]): Mapping of remaining ships and sets of
+                    positions that each ship covers. Does not contain
+                    any of the ships in ship_group. The sets of ships do
+                    not contain any of the positions in
                     covered_positions.
                 puzzle (battleships.puzzle.Puzzle): Current Puzzle
                     object.

@@ -194,7 +194,7 @@ class FieldTypeGrid(MyUserList):
             Series.ROW: replace_in_row,
             Series.COLUMN: replace_in_column,
         }
-        return fn_to_call_for_series[series](series_index)
+        fn_to_call_for_series[series](series_index)
 
 
 class InvalidSeriesException(Exception):
