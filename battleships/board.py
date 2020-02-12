@@ -4,7 +4,7 @@ import functools
 import itertools
 from typing import Any, DefaultDict, Dict, Iterable, List, Set
 
-from battleships.grid import FieldType, FieldTypeGrid, Series, Position
+from battleships.grid import FieldType, FieldTypeGrid, Position, Series
 from battleships.ship import Ship
 
 

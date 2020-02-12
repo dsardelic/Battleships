@@ -1,8 +1,7 @@
 """Contains data structures for managing fleet information."""
 
 import collections
-from typing import List, TYPE_CHECKING
-
+from typing import TYPE_CHECKING, List
 
 if TYPE_CHECKING:
     MyUserDict = collections.UserDict[int, int]  # pylint: disable=C0103

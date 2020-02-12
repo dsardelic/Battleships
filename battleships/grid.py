@@ -4,7 +4,7 @@ FieldType elements.
 
 import collections
 import enum
-from typing import List, NamedTuple, Optional, Set, TYPE_CHECKING
+from typing import TYPE_CHECKING, List, NamedTuple, Optional, Set
 
 import params
 

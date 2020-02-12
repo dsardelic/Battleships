@@ -15,11 +15,11 @@ from typing import (
     TextIO,
 )
 
+import params
 from battleships.board import Board, InvalidShipPlacementException
 from battleships.fleet import Fleet
 from battleships.grid import FieldType, FieldTypeGrid, Position
 from battleships.ship import Ship
-import params
 
 
 class InputData(NamedTuple):

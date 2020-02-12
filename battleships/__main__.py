@@ -2,8 +2,8 @@
 
 import sys
 
-from battleships import puzzle
 import params
+from battleships import puzzle
 
 
 def run() -> None:
