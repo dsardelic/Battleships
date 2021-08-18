@@ -8,10 +8,10 @@ from battleships import puzzle
 
 def run() -> None:
     """Run the puzzle solver.
-    
+
     The results are written in the default output file whose path is
     defined in the params module.
-    
+
     This function catches any previously uncaught exceptions (at least
     those derived from Exception base class) and sends the appropriate
     exit code to the OS.

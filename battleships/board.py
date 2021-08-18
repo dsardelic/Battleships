@@ -10,11 +10,11 @@ from battleships.ship import Ship
 
 class Board:
     """Represents a puzzle board object.
-    
+
     A board is a numbered grid of FieldType elements. Each number
     indicates how many ship fields remain to be marked in the
     corresponding row or column.
-    
+
     In order to ease grid index checks and marking of ships near grid
     edges, the grid is extended with a sea field rim. Therefore, the
     resulting grid is 2 rows and 2 columns bigger than the input grid.
@@ -36,7 +36,7 @@ class Board:
         number_of_ship_fields_to_mark_in_series: Dict[Series, List[int]],
     ) -> None:
         """Initialize a new Board object.
-        
+
         Args:
             grid (battleships.grid.FieldTypeGrid): Grid of FieldType
                 elements.
@@ -52,19 +52,19 @@ class Board:
 
     def __repr__(self) -> str:
         """Return a string representation of self.
-        
+
         Returns:
             str: String representation of self.
-        
+
         """
         return self.repr(True)
 
     def __eq__(self, other: Any) -> bool:
         """Compare self with some other object.
-        
+
         Args:
             other: The object to compare with self.
-        
+
         Returns:
             bool: True if objects are equal, False otherwise.
         """
@@ -84,10 +84,10 @@ class Board:
         number_of_ship_fields_to_mark_in_cols: List[int],
     ) -> "Board":
         """Create a Board object from original board data.
-        
+
         Unlike Board object data, original board data correspond to what
         a person solving the puzzle on paper would see.
-        
+
         Args:
             grid (battleships.grid.FieldTypeGrid): Input grid of
                 FieldType elements.
@@ -97,11 +97,11 @@ class Board:
             number_of_ship_fields_to_mark_in_cols (List[int]): List of
                 numbers of ship fields to mark in each corresponding
                 input grid column.
-        
+
         Returns:
             battleships.board.Board: Board object created from original
                 board data.
-        
+
         """
         board_size = len(number_of_ship_fields_to_mark_in_rows) + 2
         board_grid = FieldTypeGrid()  # type: FieldTypeGrid
@@ -126,13 +126,13 @@ class Board:
     @classmethod
     def get_copy_of(cls, original_board: "Board") -> "Board":
         """Create a copy of a Board object.
-        
+
         Args:
             original_board (battleships.board.Board): The board to copy.
-        
+
         Returns:
             battleships.board.Board: A copy of the input Board object.
-        
+
         """
         board_copy_grid = FieldTypeGrid([[*row] for row in original_board.grid])
         board_copy_number_of_ship_fields_to_mark_in_series = {
@@ -148,27 +148,27 @@ class Board:
     @property
     def size(self) -> int:
         """Return size of self's grid.
-        
+
         The grid is expected to be square-shaped, thus both dimensions
             have the same size.
-        
+
         Returns:
             int: Size of self's grid.
-        
+
         """
         return len(self.grid)
 
     def repr(self, with_ship_fields_to_mark_count: bool) -> str:
         """Return a string representation of self.
-        
+
         Args:
             with_ship_fields_to_mark_count (bool): True if number of
                 ship fields to mark in each row and column is to be
                 included in the representation, False otherwise.
-        
+
         Returns:
             str: String representation of self.
-        
+
         """
         grid = FieldTypeGrid(
             [row[1 : self.size - 1] for row in self.grid[1 : self.size - 1]]
@@ -213,12 +213,12 @@ class Board:
     def set_ship_fields_as_unknown(self, ship_fields_positions: Set[Position]) -> None:
         """Mark current FieldType as unknown on all given ship positions
         in self's grid.
-        
+
         Args:
             ship_fields_positions (Set[battleships.grid.Position]):
                 Positions of which to perform the field type
                 replacement.
-        
+
         """
         for position in ship_fields_positions:
             self.grid[position.row][position.col] = FieldType.UNKNOWN
@@ -229,11 +229,11 @@ class Board:
 
     def get_ship_fields_positions(self) -> Set[Position]:
         """Get all self's grid positions containing ship fields.
-        
+
         Returns:
             Set[battleships.grid.Position]: Set of self's grid positions
                 containing ship fields.
-        
+
         """
         return functools.reduce(
             set.union,
@@ -263,17 +263,17 @@ class Board:
     ) -> None:
         """Mark sea fields in all self's grid's positions diagonal to
         given positions.
-        
+
         While another potential ship piece might be found right next to
         a particular position (in the same row or column), all positions
         diagonal to the given position cannot contain anything other
         than sea fields.
-        
+
         Args:
             ship_fields_positions (Set[battleships.grid.Position]):
                 Positions for which to mark sea fields on diagonal
                 positions.
-        
+
         """
         for position in ship_fields_positions:
             for offset_row, offset_col in ((-1, -1), (-1, 1), (1, -1), (1, 1)):
@@ -283,17 +283,17 @@ class Board:
 
     def ship_is_within_playable_grid(self, ship: Ship) -> bool:
         """Check whether ship is within self's grid playable part.
-        
+
         Playable grid part is the board grid without the surrounding sea
         fields extension.
-        
+
         Args:
             ship (battleships.ship.Ship): Ship whose placement to check.
-        
+
         Returns:
             bool: True is ship is within self's grid's playable part,
                 False otherwise.
-        
+
         """
         return (
             ship.position.row > 0
@@ -307,18 +307,18 @@ class Board:
     def sufficient_remaining_ship_fields_to_mark_ship(self, ship: Ship) -> bool:
         """Check whether there are enough remaining ship fields to mark
         a ship onto self's grid.
-        
+
         The check is run for rows and columns that the ship would
         occupy.
-        
+
         Args:
             ship (battleships.ship.Ship): Ship whose potential placement
                 to check.
-        
+
         Returns:
             bool: True if there are sufficient remaining ship fields to
                 mark ship onto self's grid, False otherwise.
-        
+
         """
         return all(
             self.number_of_ship_fields_to_mark_in_series[series][series_index]
@@ -330,18 +330,18 @@ class Board:
     def no_disallowed_overlapping_fields_for_ship(self, ship: Ship) -> bool:
         """Check whether ship marking onto self's grid would result in
         disallowed field overlaps.
-        
+
         The check takes into consideration the entire ship's zone of
         control.
-        
+
         Args:
             ship (battleships.ship.Ship): Ship whose potential placement
                 to check.
-        
+
         Returns:
             bool: True if no disallowed overlappings would occur by
                 marking the ship, False otherwise.
-        
+
         """
         return all(
             board_field == FieldType.UNKNOWN
@@ -356,13 +356,13 @@ class Board:
 
     def can_fit_ship(self, ship: Ship) -> bool:
         """Check if ship fits onto self's grid.
-        
+
         Args:
             ship (battleships.ship.Ship): Ship whose placement to check.
-        
+
         Returns:
             bool: True if ship fits onto self's grid, False otherwise.
-        
+
         """
         return all(
             (
@@ -374,16 +374,16 @@ class Board:
 
     def mark_ship_group(self, ships_to_mark: Iterable[Ship]) -> None:
         """Simulate marking of a group of ships onto self's grid.
-        
+
         Args:
             ships_to_mark (Iterable[battleships.ship.Ship]): Ships to
                 mark onto self's grid.
-        
+
         Raises:
             battleships.board.InvalidShipPlacementException: If the
                 ships to mark cannot all at the same time be placed onto
                 self's grid.
-        
+
         """
         for ship_to_mark in ships_to_mark:
             if self.can_fit_ship(ship_to_mark):
@@ -395,22 +395,22 @@ class Board:
     def find_definite_ship_fields_positions(self) -> Set[Position]:
         """Find a set of self's grid positions that definitely contain
         ship fields.
-        
+
         Definite ship fields can be determined by comparing the number
         of ship fields remaining to be marked in a series to the number
         of unknown fields in that same series. If the numbers are equal,
         then all unknown fields are definitely ship fields.
-        
+
         The algorithm keeps track of all newly detected definite ship
         fields, as well as marks all newly discovered sea fields.
-        
+
         The discovery procedure is repeated until no new definite ship
         fields are found.
-        
+
         Returns:
             Set[battleships.grid.Position]: Self's grid positions which
                 are determined to definitely contain ship fields.
-        
+
         """
         ship_fields_to_be = set()  # type: Set[Position]
         board_to_be = Board.get_copy_of(self)
@@ -457,18 +457,18 @@ class Board:
         """For each given position in self's grid determine a set of
         ships whose ship fields might - one at a time - cover that
         position.
-        
+
         Args:
             positions (Set[battleships.grid.Position]): Board positions
                 that are to be covered.
             ship_sizes (Iterable[int]): Allowed sizes of ships to cover
                 the board positions.
-        
+
         Returns:
             Dict[battleships.grid.Position, Set[battleships.ship.Ship]]:
                 For each position a set of ships whose ship fields might
                 - one at a time - cover that position.
-        
+
         """
         ships_occupying_positions = DefaultDict(
             set
@@ -511,15 +511,15 @@ class Board:
     def get_possible_ships_of_size(self, size: int) -> Set[Ship]:
         """Get all possible ships of a given size that can - one at a
         time - be placed anywhere on self's grid.
-        
+
         Args:
             size (int): Size of ship i.e. number of ship fields it
                 contains.
-        
+
         Returns:
             Set[battleships.ship.Ship]: Ships of given size that can -
                 one at a time - be placed onto self's grid.
-        
+
         """
         if size == 1:
             return {
@@ -544,10 +544,10 @@ class Board:
 
     def mark_ship_and_surrounding_sea(self, ship: Ship) -> None:
         """Mark ship and its surrounding sea onto self's grid.
-        
+
         Args:
             ship (battleships.ship.Ship): Ship to mark onto self's grid.
-        
+
         """
         for ship_row_index, board_row in enumerate(
             self.grid[ship.zoc_slice[Series.ROW]]
@@ -567,13 +567,13 @@ class Board:
         """Check whether the number of ship fields to mark in any self's
         grid series is bigger than the number of available unknown
         fields in that same series.
-        
+
         Returns:
             bool: True if the number of ship fields to mark in any
                 self's grid series is bigger than the number of
                 available unknown fields in that same series, False
                 otherwise.
-        
+
         """
         return any(
             self.number_of_ship_fields_to_mark_in_series[series][series_index]

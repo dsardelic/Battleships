@@ -2,11 +2,11 @@ import copy
 import random
 import re
 import unittest.mock
+from test.unit.test_grid import parse_fieldtypegrid
 
 from battleships.board import Board, InvalidShipPlacementException
 from battleships.grid import FieldType, FieldTypeGrid, Position, Series
 from battleships.ship import Ship
-from test.unit.test_grid import parse_fieldtypegrid
 
 
 def parse_board(board_repr):

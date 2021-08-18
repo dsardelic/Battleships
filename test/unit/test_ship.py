@@ -1,9 +1,9 @@
 import contextlib
 import unittest.mock
+from test.unit.test_grid import parse_fieldtypegrid
 
 from battleships.grid import Position, Series
 from battleships.ship import Ship, ShipGrid
-from test.unit.test_grid import parse_fieldtypegrid
 
 
 class ShipGridTest(unittest.TestCase):

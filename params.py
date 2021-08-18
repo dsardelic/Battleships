@@ -5,7 +5,6 @@ messages.
 import pathlib
 import types
 
-
 FAILURE_EXIT_CODE = 1
 
 FIELDTYPE_SYMBOLS = types.SimpleNamespace()

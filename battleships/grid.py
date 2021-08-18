@@ -32,10 +32,10 @@ class Series(enum.Enum):
 
     def __repr__(self) -> str:
         """Get a string representation of self.
-        
+
         Returns:
             str: String representation of self.
-        
+
         """
         return f"<{self.__class__.__name__}.{self.name}>"
 
@@ -51,10 +51,10 @@ class FieldTypeGrid(MyUserList):
 
     def __repr__(self) -> str:
         """Get a string representation of self.
-        
+
         Returns:
             str: String representation of self.
-        
+
         """
         ret_val = ""
         for row in self:
@@ -70,25 +70,25 @@ class FieldTypeGrid(MyUserList):
         complementary_series_slice: Optional[slice] = None,
     ) -> List[FieldType]:
         """Get a full or partial series of grid fields.
-        
+
         While the series parameter determines the series to get, the
         complementary_series_slice parameter limits the series to the
         slice range.
-        
+
         Args:
             series (battleships.grid.Series): Grid series type.
             series_index (int): Index of series within the grid.
             complementary_series_slice (slice): Slice to apply to the
                 series.
-        
+
         Returns:
             List[battleships.grid.FieldType]: Series of FieldType grid
                 fields.
-        
+
         Raises:
             battleships.grid.InvalidSeriesException: When an invalid
                 grid series is referenced.
-        
+
         """
         if complementary_series_slice:
             series_count = {
@@ -113,7 +113,7 @@ class FieldTypeGrid(MyUserList):
     ) -> int:
         """Get count of fields of selected FieldType in a series of grid
         fields.
-        
+
         Args:
             fieldtype (battleships.grid.FieldType): Selected type of
                 FieldTypes.
@@ -121,10 +121,10 @@ class FieldTypeGrid(MyUserList):
             series_index (int): Index of series in the grid.
             complementary_series_slice (slice): Slice to apply to the
                 series.
-        
+
         Returns:
             int: Count of fieldtypes in the selected series.
-        
+
         """
         return self.get_series(series, series_index, complementary_series_slice).count(
             fieldtype
@@ -135,17 +135,17 @@ class FieldTypeGrid(MyUserList):
     ) -> Set[Position]:
         """Get positions of fields of selected type in a series of grid
         fields.
-        
+
         Args:
             fieldtype (battleships.grid.FieldType): Selected FieldTypes
                 type.
             series (battleships.grid.Series): Grid series type.
             series_index (int): Index of series within the grid.
-        
+
         Returns:
             Set[battleships.grid.Position]: Set of positions of fields
                 of given fieldtype.
-        
+
         """
         positions_for_series = {
             Series.ROW: {
@@ -169,7 +169,7 @@ class FieldTypeGrid(MyUserList):
         series_index: int,
     ) -> None:
         """Replace one FieldType in a series with another fieldtype.
-        
+
         Args:
             fieldtype_old (battleships.grid.FieldType): Type of
                 FieldType to replace.

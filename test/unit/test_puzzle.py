@@ -1,16 +1,16 @@
 import copy
 import pathlib
 import unittest.mock
+from test.unit.test_board import parse_board
+from test.unit.test_grid import parse_fieldtypegrid
 
 import battleships
+import params
 from battleships.board import InvalidShipPlacementException
 from battleships.fleet import Fleet
 from battleships.grid import FieldType, Position, Series
 from battleships.puzzle import Puzzle
 from battleships.ship import Ship
-import params
-from test.unit.test_board import parse_board
-from test.unit.test_grid import parse_fieldtypegrid
 
 
 class TestPuzzle(unittest.TestCase):

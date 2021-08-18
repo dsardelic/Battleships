@@ -12,3 +12,4 @@ max-line-length=88
 [DESIGN]
 max-parents=12
 max-attributes=8
+max-try-statements=2

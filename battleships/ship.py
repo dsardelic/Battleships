@@ -20,15 +20,15 @@ class ShipGrid(FieldTypeGrid):
     @classmethod
     def get_grid(cls, ship_size: int, orientation: Series) -> FieldTypeGrid:
         """Get grid of a ship of particular size and orientation.
-        
+
         Args:
             ship_size (int): Size of ship.
             orientation (battleships.grid.Series): Ship orientation.
-        
+
         Returns:
             battleships.grid.FieldTypeGrid: Grid of ship of given size
                 and orientation.
-        
+
         """
 
         def generate_grid(ship_size: int, orientation: Series) -> FieldTypeGrid:
@@ -65,16 +65,16 @@ class ShipGrid(FieldTypeGrid):
 @dataclasses.dataclass(unsafe_hash=True)
 class Ship:
     """Class representing a ship.
-    
+
     A ship is unequivocally determined by its attributes:
         1) Position on the grid (battleships.grid.Position) -
             coordinates of the ship field nearest to the position (0, 0)
         2) Size (int) - number of ship fields
         3) Orientation (battleships.grid.Series) - direction in which
             the ship fields are spatially distributed on the grid.
-    
+
     A ship of size 1 should be initialized with Series.ROW orientation.
-    
+
     The ship itself includes fields of type FieldType.SHIP only. The
     area containing sea fields around the ship is referred to as ship's
     "zone of control" or ZOC. As per puzzle rules, two or more ships
@@ -87,12 +87,12 @@ class Ship:
 
     def __init__(self, position: Position, size: int, orientation: Series):
         """Initialize a new Ship object.
-        
+
         Args:
            position (Position): Ship's position on the grid.
            size (int): Ship's size.
            orientation (Series): Ship's orientation.
-         
+
         """
         self.position = position
         self.size = size
@@ -111,22 +111,22 @@ class Ship:
     @property
     def grid(self) -> FieldTypeGrid:
         """Return FieldTypeGrid object which corresponds to this ship.
-        
+
         Returns:
             battleships.grid.FieldTypeGrid: FieldTypeGrid which
                 corresponds to this ship.
-        
+
         """
         return ShipGrid.get_grid(self.size, self.orientation)
 
     @property
     def ship_fields_count_in_series(self) -> Dict[Series, int]:
         """Get number of ship fields in each possible orientation.
-        
+
         Returns:
             Dict[battleships.grid.Series, int]: Number of ship fields
                 per grid series.
-        
+
         """
         if not self._ship_fields_count_in_series:
             self._ship_fields_count_in_series = {
@@ -139,11 +139,11 @@ class Ship:
     def max_ship_field_index_in_series(self) -> Dict[Series, int]:
         """Get the maximum index of series (per series) which contains a
         piece of this ship.
-        
+
         Returns:
             Dict[battleships.grid.Series, int]: Maximum ship field index
                 per grid series.
-        
+
         """
         if not self._max_ship_field_index_in_series:
             self._max_ship_field_index_in_series = {
@@ -163,17 +163,17 @@ class Ship:
     ) -> Dict[Series, Any]:
         """Map each series to a "reach object" (range or slice) that
         covers ship fields area or ship ZOC area.
-        
+
         Args:
             function (Callable[..., GenericType]): Either range or slice
                 built-in function
             zoc (bool): Indicates whether the reach object covers the
                 ship fields or the ship ZOC area
-        
+
         Returns:
             Dict[battleships.grid.Series, Any]: Reach object covering
                 ship fields area or ship ZOC area per series.
-        
+
         """
 
         def reach_limits(min_value: int, max_value: int, zoc: bool) -> Tuple[int, int]:
@@ -205,11 +205,11 @@ class Ship:
     @property
     def ship_fields_range(self) -> Dict[Series, range]:
         """Get ranges of ship fields per series.
-        
+
         Returns:
             Dict[battleships.grid.Series, range]: Ranges of ship fields
                 per series.
-        
+
         """
         if not self._ship_fields_range:
             self._ship_fields_range = self._create_reach_object(range, False)
@@ -218,11 +218,11 @@ class Ship:
     @property
     def ship_fields_slice(self) -> Dict[Series, slice]:
         """Get slices of ship fields per series.
-        
+
         Returns:
             Dict[battleships.grid.Series, slice]: Slices of ship fields
                 per series.
-        
+
         """
         if not self._ship_fields_slice:
             self._ship_fields_slice = self._create_reach_object(slice, False)
@@ -231,11 +231,11 @@ class Ship:
     @property
     def zoc_slice(self) -> Dict[Series, slice]:
         """Get slices of ship ZOC per series.
-        
+
         Returns:
             Dict[battleships.grid.Series, slice]: Slices of ship ZOC per
                 series.
-        
+
         """
         if not self._zoc_slice:
             self._zoc_slice = self._create_reach_object(slice, True)
