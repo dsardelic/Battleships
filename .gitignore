@@ -100,10 +100,12 @@ ENV/
 # mypy
 .mypy_cache/
 
-#Eclipse stuff
+# Eclipse stuff
 .project
 .settings/
 
-#PyDev stuff
+# PyDev stuff
 .pydevproject
 
+# VS code stuff
+.vscode/

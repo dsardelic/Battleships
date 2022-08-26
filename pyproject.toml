@@ -1,2 +1,18 @@
-[tool.black]
-line-length = 88
+[tool.pylint.main]
+ignore = ["test", ".venv"]
+ignore-patterns = ["^test_\\w+\\.py$"]
+load-plugins = ["pylint.extensions.broad_try_clause", "pylint.extensions.emptystring", "pylint.extensions.comparetozero", "pylint.extensions.bad_builtin", "pylint.extensions.mccabe", "pylint.extensions.docstyle", "pylint.extensions.check_elif", "pylint.extensions.redefined_variable_type", "pylint.extensions.overlapping_exceptions", "pylint.extensions.docparams"]
+
+[tool.pylint.broad_try_clause]
+max-try-statements = 2
+
+[tool.pylint.design]
+max-attributes = 8
+max-parents = 12
+
+[tool.isort]
+multi_line_output = "3"
+include_trailing_comma = "True"
+force_grid_wrap = "0"
+use_parentheses = "True"
+profile = "black"
