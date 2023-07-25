@@ -1,11 +1,9 @@
 """This module contains data structures for managing ship data."""
 
 import dataclasses
-from typing import Any, Callable, Dict, Tuple, TypeVar
+from typing import Any, Dict, Tuple, Type, Union
 
 from battleships.grid import FieldType, FieldTypeGrid, Position, Series
-
-GenericType = TypeVar("GenericType")
 
 
 class ShipGrid(FieldTypeGrid):
@@ -159,7 +157,7 @@ class Ship:
         return self._max_ship_field_index_in_series
 
     def _create_reach_object(
-        self, function: Callable[..., GenericType], zoc: bool
+        self, function: Union[Type[range], Type[slice]], zoc: bool
     ) -> Dict[Series, Any]:
         """Map each series to a "reach object" (range or slice) that
         covers ship fields area or ship ZOC area.
